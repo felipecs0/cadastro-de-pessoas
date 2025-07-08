@@ -1,0 +1,47 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": false,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "es2020",
+    "lib": [
+      "es2020",
+      "dom",
+      "ES2021.String"
+    ],
+    "paths": {
+      "@components/*": ["src/app/shared/components/*"],
+      "@services/*": ["src/app/core/services/*"],
+      "@resolvers/*": ["src/app/core/resolvers/*"],
+      "@constants/*": ["src/app/core/constants/*"],
+      "@enums/*": ["src/app/shared/enums/*"],
+      "@guards/*": ["src/app/core/guards/*"],
+      "@helpers/*": ["src/app/shared/helpers/*"],
+      "@interfaces/*": ["src/app/core/interfaces/*"],
+      "@env/*": ["src/environments/*"]
+    },
+    "useDefineForClassFields": false
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

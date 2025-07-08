@@ -1,0 +1,12 @@
+.scrollable-container {
+  display: block;
+  background: linear-gradient(135deg, #94c5f8 0%, #a6e6ff 50%, #b1f1ff 100%);
+  min-height: 100vh;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  .layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+}
