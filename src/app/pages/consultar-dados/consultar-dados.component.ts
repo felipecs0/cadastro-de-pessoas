@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, DestroyRef, inject } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -9,8 +9,8 @@ import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
 import { CardModule } from 'primeng/card';
 import { Carousel } from 'primeng/carousel';
-import { Button } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
+import { Button, ButtonModule } from 'primeng/button';
+import { InputText, InputTextModule } from 'primeng/inputtext';
 import { FloatLabel } from 'primeng/floatlabel';
 import { Message } from 'primeng/message';
 import { ProgressSpinner } from 'primeng/progressspinner';
@@ -24,30 +24,17 @@ import { PessoasService } from '@services/pessoas.service';
 import { PessoaDados } from '../../core/interfaces/pessoas.interface';
 import { MaskUtils } from '../../core/utils/mask.utils';
 import { CustomValidators } from '../../core/validators/custom-validators';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { SelectModule } from 'primeng/select';
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-consultar-dados',
   templateUrl: './consultar-dados.component.html',
   styleUrls: ['./consultar-dados.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    TabsModule,
-    CardModule,
-    Carousel,
-    Button,
-    InputText,
-    FloatLabel,
-    Message,
-    ProgressSpinner,
-    Divider,
-    Tag,
-    Skeleton,
-    Avatar,
-    Panel
-  ]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+   imports     : [FormsModule, ButtonModule, AutoCompleteModule,SelectModule, Toast, ReactiveFormsModule, InputTextModule]
 })
 export class ConsultarDadosComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
@@ -119,7 +106,7 @@ export class ConsultarDadosComponent implements OnInit {
         this.isLoading = false;
       }, 1500);
 
-      /* 
+      /*
       // Implementação real com service:
       this.pessoaService.buscarPorCpf(cpfLimpo)
         .pipe(takeUntilDestroyed(this.destroyRef))

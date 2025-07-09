@@ -8,7 +8,7 @@ export const routes : Routes = [
     loadComponent: () => import('./pages/cadastrar-pessoas/cadastrar-pessoas.component').then(m => m.CadastrarPessoasComponent),
   },
   {
-    path: 'consultar-dados/:id',
+    path: 'consultar-dados',
     loadComponent: () => import('./pages/consultar-dados/consultar-dados.component').then(m => m.ConsultarDadosComponent),
   },
   {

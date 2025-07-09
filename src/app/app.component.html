@@ -1,5 +1,47 @@
 <div class="scrollable-container">
   <div class="layout w-full p-4">
+    <header class="surface-card shadow-1 border-round mb-4 mt-4" role="banner">
+        <div class="flex justify-content-between align-items-center p-4">
+
+          <!-- Logo/Título -->
+          <div class="flex align-items-center">
+            <i class="pi pi-users text-primary text-2xl mr-3" aria-hidden="true"></i>
+            <h1 class="text-xl font-medium text-900 m-0">
+              Cadastro de Pessoas
+            </h1>
+          </div>
+
+          <!-- Menu de Navegação -->
+          <nav aria-label="Menu principal">
+            <div class="flex gap-2">
+
+              <a
+                routerLink="/cadastrar-pessoas"
+                routerLinkActive="p-button-primary"
+                class="p-button p-button-outlined p-button-sm"
+                pButton
+                label="Cadastrar"
+                aria-label="Ir para página de cadastro de pessoas">
+                <i class="pi pi-plus mr-2" aria-hidden="true"></i>
+                Cadastrar
+              </a>
+
+              <a
+                routerLink="/consultar-dados"
+                routerLinkActive="p-button-primary"
+                class="p-button p-button-outlined p-button-sm"
+                pButton
+                label="Consultar"
+                aria-label="Ir para página de consulta de pessoas">
+                <i class="pi pi-search mr-2" aria-hidden="true"></i>
+                Consultar
+              </a>
+
+            </div>
+          </nav>
+
+        </div>
+      </header>
     <p-toast position="top-right" key="tl" />
     <router-outlet></router-outlet>
   </div>

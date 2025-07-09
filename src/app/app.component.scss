@@ -1,3 +1,7 @@
+a[routerLink] {
+  text-decoration: none;
+}
+
 .scrollable-container {
   display: block;
   background: linear-gradient(135deg, #94c5f8 0%, #a6e6ff 50%, #b1f1ff 100%);
@@ -10,3 +14,5 @@
     min-height: 100vh;
   }
 }
+
+
