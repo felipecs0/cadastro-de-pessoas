@@ -1,9 +1,9 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, DestroyRef, inject, Input } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SelectChangeEvent, SelectModule } from 'primeng/select';
-import { Button } from 'primeng/button';
+import { ButtonModule } from 'primeng/button';
 import { PessoasService } from '@services/pessoas.service';
 import { estadosDoBrasil } from 'src/app/core/constants/estados.constants';
 import { Estado } from '../../core/interfaces/estados.interface';
@@ -13,16 +13,26 @@ import { FloatLabel } from "primeng/floatlabel"
 import { PessoaDados } from '../../core/interfaces/pessoas.interface';
 import { REGEX_PATTERNS, FORM_FIELD_CONFIGS } from '../../core/interfaces/form-validators.interface';
 import { MaskUtils } from '../../core/utils/mask.utils';
+import { Toast } from 'primeng/toast';
+import { InputTextModule } from 'primeng/inputtext';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 
 @Component({
   selector    : 'app-cadastrar-pessoas',
   templateUrl : './cadastrar-pessoas.component.html',
   styleUrls   : ['./cadastrar-pessoas.component.scss'],
   standalone  : true,
-  imports     : [FormsModule, Button, SelectModule, FloatLabel, ReactiveFormsModule]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports     : [FormsModule, ButtonModule, SelectModule, Toast, ReactiveFormsModule, InputTextModule]
 })
 export class CadastrarPessoasComponent {
   private destroyRef = inject(DestroyRef);
+  public readonly sexoOptions = [
+    { label: 'Masculino', value: 'masculino' },
+    { label: 'Feminino', value: 'feminino' },
+    { label: 'Outro', value: 'outro' },
+    { label: 'Prefiro não informar', value: 'nao_informar' }
+  ];
 
   public readonly CONTROLS = {
     nome: new FormControl<string | null>(

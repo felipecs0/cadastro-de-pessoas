@@ -1,7 +1,7 @@
 // Angular modules
 import { Component }        from '@angular/core';
 import { OnInit }           from '@angular/core';
-import { RouterOutlet }     from '@angular/router';
+import { RouterLink, RouterOutlet }     from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 
 @Component({
@@ -9,7 +9,7 @@ import { ToastModule } from 'primeng/toast';
   templateUrl : './app.component.html',
   styleUrls   : ['./app.component.scss'],
   standalone  : true,
-  imports     : [RouterOutlet, ToastModule]
+  imports     : [RouterOutlet, ToastModule, RouterLink]
 })
 export class AppComponent implements OnInit {
   public ngOnInit() : void {}
