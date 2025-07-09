@@ -9,7 +9,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:coverage": "ng test --code-coverage",
-    "test:headless": "ng test --watch=false --browsers=ChromeHeadless"
+    "test:headless": "ng test --watch=false --browsers=ChromeHeadless",
+    "msw:init": "npx msw init src --save"
   },
   "private": true,
   "dependencies": {
@@ -44,6 +45,12 @@
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "~1.7.0",
     "typescript": "~5.4.5",
-    "@ngneat/spectator": "^19.2.0"
+    "@ngneat/spectator": "^19.2.0",
+    "msw": "^2.0.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "src"
+    ]
   }
 }

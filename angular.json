@@ -28,7 +28,8 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/assets/img/favicon/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/mockServiceWorker.js"
             ],
             "styles": [
               "src/assets/scss/styles.scss",
@@ -98,7 +99,8 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/assets/img/favicon/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/mockServiceWorker.js"
             ],
             "styles": [
               "src/assets/scss/styles.scss"

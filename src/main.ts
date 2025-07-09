@@ -13,12 +13,24 @@ import { environment }          from './environments/environment';
 // Components
 import { AppComponent }         from './app/app.component';
 
+// Mock service initialization
+async function prepareMocks() {
+  if (!environment.production) {
+    const { initMocks } = await import('./mocks/init');
+    return initMocks();
+  }
+  return Promise.resolve();
+}
+
 if (environment.production) {
   enableProdMode();
 }
 
-bootstrapApplication(
-  AppComponent,
-  appConfig
-)
-.catch(err => console.error(err));
+// Initialize mocks in development, then bootstrap the app
+prepareMocks().then(() => {
+  bootstrapApplication(
+    AppComponent,
+    appConfig
+  )
+  .catch(err => console.error(err));
+});

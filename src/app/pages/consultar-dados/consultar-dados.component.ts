@@ -3,22 +3,10 @@ import { OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 
 // PrimeNG Components
-import { TabsModule } from 'primeng/tabs';
-import { CardModule } from 'primeng/card';
-import { Carousel } from 'primeng/carousel';
-import { Button, ButtonModule } from 'primeng/button';
-import { InputText, InputTextModule } from 'primeng/inputtext';
-import { FloatLabel } from 'primeng/floatlabel';
-import { Message } from 'primeng/message';
-import { ProgressSpinner } from 'primeng/progressspinner';
-import { Divider } from 'primeng/divider';
-import { Tag } from 'primeng/tag';
-import { Skeleton } from 'primeng/skeleton';
-import { Avatar } from 'primeng/avatar';
-import { Panel } from 'primeng/panel';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 
 import { PessoasService } from '@services/pessoas.service';
 import { PessoaDados } from '../../core/interfaces/pessoas.interface';
@@ -34,7 +22,7 @@ import { Toast } from 'primeng/toast';
   styleUrls: ['./consultar-dados.component.scss'],
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-   imports     : [FormsModule, ButtonModule, AutoCompleteModule,SelectModule, Toast, ReactiveFormsModule, InputTextModule]
+   imports: [FormsModule, ButtonModule, AutoCompleteModule,SelectModule, Toast, ReactiveFormsModule, InputTextModule]
 })
 export class ConsultarDadosComponent implements OnInit {
   private destroyRef = inject(DestroyRef);

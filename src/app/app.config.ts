@@ -17,6 +17,7 @@ import { TokenInterceptor } from './core/interceptors/token/token.interceptor';
 import { MessageService } from 'primeng/api';
 import { ErrorHandlingInterceptor } from './core/interceptors/error-handling/error-handling.interceptor';
 import { LoaderInterceptor } from './core/interceptors/loader/loader.interceptor';
+import { environment } from '../environments/environment';
 import localePt from '@angular/common/locales/pt';
 import { MyPreset } from 'src/assets/theme/mytheme';
 registerLocaleData(localePt);

@@ -1,7 +1,5 @@
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
-import { SelectChangeEvent } from 'primeng/select';
 import { Spectator, createComponentFactory } from '@ngneat/spectator';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PessoasService } from '@services/pessoas.service';

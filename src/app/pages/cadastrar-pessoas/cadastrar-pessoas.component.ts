@@ -1,32 +1,37 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, DestroyRef, inject, Input } from '@angular/core';
-import { OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { SelectChangeEvent, SelectModule } from 'primeng/select';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, DestroyRef, inject } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { PessoasService } from '@services/pessoas.service';
-import { estadosDoBrasil } from 'src/app/core/constants/estados.constants';
-import { Estado } from '../../core/interfaces/estados.interface';
-import { Localidade } from '../../core/interfaces/localidade.interface';
 import { Router } from '@angular/router';
-import { FloatLabel } from "primeng/floatlabel"
 import { PessoaDados } from '../../core/interfaces/pessoas.interface';
-import { REGEX_PATTERNS, FORM_FIELD_CONFIGS } from '../../core/interfaces/form-validators.interface';
+import { FORM_FIELD_CONFIGS } from '../../core/constants/cadastro-pessoa-form.config';
 import { MaskUtils } from '../../core/utils/mask.utils';
 import { Toast } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
-import { AutoCompleteModule } from 'primeng/autocomplete';
+import { CommonModule } from '@angular/common';
+import { MessageService } from 'primeng/api';
 
 @Component({
-  selector    : 'app-cadastrar-pessoas',
-  templateUrl : './cadastrar-pessoas.component.html',
-  styleUrls   : ['./cadastrar-pessoas.component.scss'],
-  standalone  : true,
+  selector: 'app-cadastrar-pessoas',
+  templateUrl: './cadastrar-pessoas.component.html',
+  styleUrls: ['./cadastrar-pessoas.component.scss'],
+  standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports     : [FormsModule, ButtonModule, SelectModule, Toast, ReactiveFormsModule, InputTextModule]
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ButtonModule,
+    SelectModule,
+    Toast,
+    InputTextModule
+  ],
+  providers: [MessageService]
 })
 export class CadastrarPessoasComponent {
   private destroyRef = inject(DestroyRef);
+
   public readonly sexoOptions = [
     { label: 'Masculino', value: 'masculino' },
     { label: 'Feminino', value: 'feminino' },
@@ -58,21 +63,14 @@ export class CadastrarPessoasComponent {
   };
 
   public pessoaForm: FormGroup;
-  public estadoSelecionado: Estado | null = null;
-  public cidadeSelecionada: Localidade | null = null;
-  public listaEstadosBrasil: Estado[] = estadosDoBrasil;
-  public listaCidades: Localidade[] | undefined;
 
   constructor(
     private readonly pessoaDados: PessoasService,
     private readonly formBuilder: FormBuilder,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly messageService: MessageService
   ) {
-    this.pessoaForm = this.formBuilder.group(this.CONTROLS)
-  }
-
-  buscarCidades(event: SelectChangeEvent) {
-    this.pessoaForm.get('cidade')?.enable();
+    this.pessoaForm = this.formBuilder.group(this.CONTROLS);
   }
 
   verDadosPessoa() {
@@ -84,11 +82,31 @@ export class CadastrarPessoasComponent {
         email: this.CONTROLS.email.value || '',
         telefone: this.CONTROLS.telefone.value || ''
       };
+
       console.log('Dados da pessoa:', pessoaDados);
-      // Aqui você pode fazer o que quiser com os dados (salvar, navegar, etc.)
+
+      // Exibir mensagem de sucesso
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Pessoa cadastrada com sucesso!',
+        key: 'cadastro'
+      });
+
+      // Resetar formulário após sucesso
+      this.pessoaForm.reset();
+
     } else {
       console.log('Formulário inválido');
       this.markFormGroupTouched();
+
+      // Exibir mensagem de erro
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Por favor, corrija os erros no formulário',
+        key: 'cadastro'
+      });
     }
   }
 
@@ -110,42 +128,19 @@ export class CadastrarPessoasComponent {
     MaskUtils.applyTelefoneMask(event);
   }
 
-  // Método para validar CPF
-  isValidCPF(cpf: string): boolean {
-    const cleanCpf = MaskUtils.removeMask(cpf);
-
-    if (cleanCpf.length !== 11) return false;
-
-    // Verifica se todos os dígitos são iguais
-    if (/^(\d)\1+$/.test(cleanCpf)) return false;
-
-    // Validação do primeiro dígito verificador
-    let sum = 0;
-    for (let i = 0; i < 9; i++) {
-      sum += parseInt(cleanCpf.charAt(i)) * (10 - i);
-    }
-    let firstDigit = 11 - (sum % 11);
-    if (firstDigit >= 10) firstDigit = 0;
-
-    if (parseInt(cleanCpf.charAt(9)) !== firstDigit) return false;
-
-    // Validação do segundo dígito verificador
-    sum = 0;
-    for (let i = 0; i < 10; i++) {
-      sum += parseInt(cleanCpf.charAt(i)) * (11 - i);
-    }
-    let secondDigit = 11 - (sum % 11);
-    if (secondDigit >= 10) secondDigit = 0;
-
-    return parseInt(cleanCpf.charAt(10)) === secondDigit;
-  }
-
   // Método para obter mensagens de erro específicas
   getErrorMessage(fieldName: string): string {
     const control = this.pessoaForm.get(fieldName);
     if (control?.errors && control.touched) {
       if (control.errors['required']) {
-        return `${fieldName} é obrigatório`;
+        const fieldLabels: { [key: string]: string } = {
+          'nome': 'Nome',
+          'cpf': 'CPF',
+          'sexo': 'Sexo',
+          'email': 'E-mail',
+          'telefone': 'Telefone'
+        };
+        return `${fieldLabels[fieldName] || fieldName} é obrigatório`;
       }
       if (control.errors['pattern']) {
         switch (fieldName) {
@@ -169,10 +164,44 @@ export class CadastrarPessoasComponent {
         return 'Email deve ter um formato válido';
       }
       if (control.errors['minlength']) {
-        return `${fieldName} deve ter pelo menos ${control.errors['minlength'].requiredLength} caracteres`;
+        return `Campo deve ter pelo menos ${control.errors['minlength'].requiredLength} caracteres`;
       }
     }
     return '';
   }
 
+  // Método para debug (remover em produção)
+  getFormErrors(): any {
+    const errors: any = {};
+    Object.keys(this.CONTROLS).forEach(key => {
+      const control = this.pessoaForm.get(key);
+      if (control?.errors) {
+        errors[key] = control.errors;
+      }
+    });
+    return errors;
+  }
+
+  // Método para limpar formulário
+  limparFormulario(): void {
+    this.pessoaForm.reset();
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Formulário limpo',
+      detail: 'Todos os campos foram resetados',
+      key: 'cadastro'
+    });
+  }
+
+  // Método para cancelar e voltar
+  cancelar(): void {
+    if (this.pessoaForm.dirty) {
+      // Implementar modal de confirmação se necessário
+      if (confirm('Tem certeza que deseja cancelar? Todos os dados serão perdidos.')) {
+        this.router.navigate(['/consultar-dados']);
+      }
+    } else {
+      this.router.navigate(['/consultar-dados']);
+    }
+  }
 }

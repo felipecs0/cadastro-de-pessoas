@@ -13,7 +13,9 @@
       </header>
 
       <!-- Formulário -->
-      <form class="surface-card p-4 shadow-2 border-round"
+      <form [formGroup]="pessoaForm"
+            (ngSubmit)="verDadosPessoa()"
+            class="surface-card p-4 shadow-2 border-round"
             novalidate
             aria-labelledby="cadastro-heading"
             aria-describedby="cadastro-description">
@@ -30,12 +32,25 @@
               id="nome"
               type="text"
               pInputText
+              formControlName="nome"
               class="w-full"
+              [class.ng-invalid]="pessoaForm.get('nome')?.invalid && pessoaForm.get('nome')?.touched"
+              [class.ng-dirty]="pessoaForm.get('nome')?.dirty"
               placeholder="Digite o nome completo"
               autocomplete="name"
               aria-required="true"
-              aria-describedby="nome-help" />
-            <small id="nome-help" class="block text-600 mt-1">
+              aria-describedby="nome-help nome-error" />
+
+            <!-- Mensagem de erro -->
+            <small *ngIf="pessoaForm.get('nome')?.invalid && pessoaForm.get('nome')?.touched"
+                   id="nome-error"
+                   class="block text-red-500 mt-1">
+              {{ getErrorMessage('nome') }}
+            </small>
+
+            <small *ngIf="!pessoaForm.get('nome')?.invalid || !pessoaForm.get('nome')?.touched"
+                   id="nome-help"
+                   class="block text-600 mt-1">
               Informe o nome completo da pessoa
             </small>
           </div>
@@ -50,13 +65,27 @@
               id="cpf"
               type="text"
               pInputText
+              formControlName="cpf"
+              (input)="onCpfInput($event)"
               class="w-full"
+              [class.ng-invalid]="pessoaForm.get('cpf')?.invalid && pessoaForm.get('cpf')?.touched"
+              [class.ng-dirty]="pessoaForm.get('cpf')?.dirty"
               placeholder="000.000.000-00"
               maxlength="14"
               autocomplete="off"
               aria-required="true"
-              aria-describedby="cpf-help" />
-            <small id="cpf-help" class="block text-600 mt-1">
+              aria-describedby="cpf-help cpf-error" />
+
+            <!-- Mensagem de erro -->
+            <small *ngIf="pessoaForm.get('cpf')?.invalid && pessoaForm.get('cpf')?.touched"
+                   id="cpf-error"
+                   class="block text-red-500 mt-1">
+              {{ getErrorMessage('cpf') }}
+            </small>
+
+            <small *ngIf="!pessoaForm.get('cpf')?.invalid || !pessoaForm.get('cpf')?.touched"
+                   id="cpf-help"
+                   class="block text-600 mt-1">
               Digite apenas números, a formatação será aplicada automaticamente
             </small>
           </div>
@@ -69,16 +98,28 @@
             </label>
             <p-select
               inputId="sexo"
+              formControlName="sexo"
               [options]="sexoOptions"
+              optionLabel="label"
+              optionValue="value"
               placeholder="Selecione o sexo"
               styleClass="w-full"
+              [class.ng-invalid]="pessoaForm.get('sexo')?.invalid && pessoaForm.get('sexo')?.touched"
+              [class.ng-dirty]="pessoaForm.get('sexo')?.dirty"
               aria-required="true"
-              aria-describedby="sexo-help">
-              <ng-template pTemplate="selectedItem">
-                <span>Selecione o sexo</span>
-              </ng-template>
+              aria-describedby="sexo-help sexo-error">
             </p-select>
-            <small id="sexo-help" class="block text-600 mt-1">
+
+            <!-- Mensagem de erro -->
+            <small *ngIf="pessoaForm.get('sexo')?.invalid && pessoaForm.get('sexo')?.touched"
+                   id="sexo-error"
+                   class="block text-red-500 mt-1">
+              {{ getErrorMessage('sexo') }}
+            </small>
+
+            <small *ngIf="!pessoaForm.get('sexo')?.invalid || !pessoaForm.get('sexo')?.touched"
+                   id="sexo-help"
+                   class="block text-600 mt-1">
               Selecione uma das opções disponíveis
             </small>
           </div>
@@ -93,12 +134,25 @@
               id="email"
               type="email"
               pInputText
+              formControlName="email"
               class="w-full"
+              [class.ng-invalid]="pessoaForm.get('email')?.invalid && pessoaForm.get('email')?.touched"
+              [class.ng-dirty]="pessoaForm.get('email')?.dirty"
               placeholder="exemplo@email.com"
               autocomplete="email"
               aria-required="true"
-              aria-describedby="email-help" />
-            <small id="email-help" class="block text-600 mt-1">
+              aria-describedby="email-help email-error" />
+
+            <!-- Mensagem de erro -->
+            <small *ngIf="pessoaForm.get('email')?.invalid && pessoaForm.get('email')?.touched"
+                   id="email-error"
+                   class="block text-red-500 mt-1">
+              {{ getErrorMessage('email') }}
+            </small>
+
+            <small *ngIf="!pessoaForm.get('email')?.invalid || !pessoaForm.get('email')?.touched"
+                   id="email-help"
+                   class="block text-600 mt-1">
               Informe um endereço de e-mail válido
             </small>
           </div>
@@ -112,12 +166,26 @@
               id="telefone"
               type="tel"
               pInputText
+              formControlName="telefone"
+              (input)="onTelefoneInput($event)"
               class="w-full"
+              [class.ng-invalid]="pessoaForm.get('telefone')?.invalid && pessoaForm.get('telefone')?.touched"
+              [class.ng-dirty]="pessoaForm.get('telefone')?.dirty"
               placeholder="(00) 00000-0000"
               maxlength="15"
               autocomplete="tel"
-              aria-describedby="telefone-help" />
-            <small id="telefone-help" class="block text-600 mt-1">
+              aria-describedby="telefone-help telefone-error" />
+
+            <!-- Mensagem de erro -->
+            <small *ngIf="pessoaForm.get('telefone')?.invalid && pessoaForm.get('telefone')?.touched"
+                   id="telefone-error"
+                   class="block text-red-500 mt-1">
+              {{ getErrorMessage('telefone') }}
+            </small>
+
+            <small *ngIf="!pessoaForm.get('telefone')?.invalid || !pessoaForm.get('telefone')?.touched"
+                   id="telefone-help"
+                   class="block text-600 mt-1">
               Telefone com DDD (opcional)
             </small>
           </div>
@@ -151,6 +219,17 @@
             <i class="pi pi-info-circle mr-1" aria-hidden="true"></i>
             Os campos marcados com <span class="text-red-500 font-medium">*</span> são obrigatórios
           </small>
+        </div>
+
+        <!-- Debug do formulário (remover em produção) -->
+        <div class="mt-4 p-3 surface-200 border-round" *ngIf="false">
+          <h4>Debug do Formulário:</h4>
+          <p><strong>Status:</strong> {{ pessoaForm.status }}</p>
+          <p><strong>Válido:</strong> {{ pessoaForm.valid }}</p>
+          <p><strong>Valores:</strong></p>
+          <pre>{{ pessoaForm.value | json }}</pre>
+          <p><strong>Erros:</strong></p>
+          <pre>{{ getFormErrors() | json }}</pre>
         </div>
 
       </form>
