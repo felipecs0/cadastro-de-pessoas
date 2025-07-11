@@ -13,6 +13,7 @@ import { MaskUtils } from '../../core/utils/mask.utils';
 import { CustomValidators } from '../../core/validators/custom-validators';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { SelectModule } from 'primeng/select';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-consultar-dados',
@@ -43,7 +44,8 @@ export class ConsultarDadosComponent {
   constructor(
     private readonly pessoaService: PessoasService,
     private readonly router: Router,
-    private readonly formBuilder: FormBuilder
+    private readonly formBuilder: FormBuilder,
+    private readonly messageService: MessageService
   ) {
     this.searchForm = this.formBuilder.group(this.SEARCH_CONTROLS);
   }
@@ -135,6 +137,12 @@ export class ConsultarDadosComponent {
         .subscribe({
           next: () => {
             this.limparBusca();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Sucesso',
+              detail: 'Pessoa excluída com sucesso.',
+              key: 'cadastro'
+            });
           },
           error: (error) => {
             this.errorMessage = 'Erro ao excluir pessoa.';

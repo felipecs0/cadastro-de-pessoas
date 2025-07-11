@@ -11,6 +11,7 @@ import { PessoasService } from '@services/pessoas.service';
 import { PessoaDados } from '../../core/interfaces/pessoas.interface';
 import { MaskUtils } from '../../core/utils/mask.utils';
 import { CustomValidators } from '../../core/validators/custom-validators';
+import { MessageService } from 'primeng/api';
 
 // PrimeNG Components
 import { ButtonModule } from 'primeng/button';
@@ -23,6 +24,7 @@ describe('ConsultarDadosComponent', () => {
   let component: ConsultarDadosComponent;
   let pessoasService: SpyObject<PessoasService>;
   let router: SpyObject<Router>;
+  let messageService: SpyObject<MessageService>;
 
   const mockPessoa: PessoaDados = {
     nome: 'João Silva Santos',
@@ -46,7 +48,8 @@ describe('ConsultarDadosComponent', () => {
     ],
     mocks: [
       PessoasService,
-      Router
+      Router,
+      MessageService
     ]
   });
 
@@ -55,6 +58,7 @@ describe('ConsultarDadosComponent', () => {
     component = spectator.component;
     pessoasService = spectator.inject(PessoasService);
     router = spectator.inject(Router);
+    messageService = spectator.inject(MessageService);
   });
 
   describe('Inicialização do Componente', () => {
@@ -248,6 +252,12 @@ describe('ConsultarDadosComponent', () => {
 
       expect(pessoasService.excluirPessoa).toHaveBeenCalledWith('12345678901');
       expect(limparSpy).toHaveBeenCalled();
+      expect(messageService.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Pessoa excluída com sucesso.',
+        key: 'cadastro'
+      });
     });
 
     it('deve tratar erro ao excluir pessoa', () => {
@@ -266,6 +276,45 @@ describe('ConsultarDadosComponent', () => {
       component.excluirDadosPessoa('12345678901');
 
       expect(pessoasService.excluirPessoa).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Getters', () => {
+    it('isFormValid deve retornar true quando formulário for válido', () => {
+      component.searchForm.patchValue({ cpf: '123.456.789-01' });
+      component.searchForm.markAsTouched();
+      
+      expect(component.isFormValid).toBeTruthy();
+    });
+
+    it('isFormValid deve retornar false quando formulário for inválido', () => {
+      component.searchForm.patchValue({ cpf: '' });
+      
+      expect(component.isFormValid).toBeFalsy();
+    });
+
+    it('hasCpfValue deve retornar true quando CPF tiver valor', () => {
+      component.searchForm.patchValue({ cpf: '123.456.789-01' });
+      
+      expect(component.hasCpfValue).toBeTruthy();
+    });
+
+    it('hasCpfValue deve retornar false quando CPF estiver vazio', () => {
+      component.searchForm.patchValue({ cpf: '' });
+      
+      expect(component.hasCpfValue).toBeFalsy();
+    });
+
+    it('hasCpfValue deve retornar false quando CPF for apenas espaços', () => {
+      component.searchForm.patchValue({ cpf: '   ' });
+      
+      expect(component.hasCpfValue).toBeFalsy();
+    });
+
+    it('hasCpfValue deve retornar false quando CPF for null', () => {
+      component.searchForm.patchValue({ cpf: null });
+      
+      expect(component.hasCpfValue).toBeFalsy();
     });
   });
 

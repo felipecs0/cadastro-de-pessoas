@@ -139,17 +139,17 @@ describe('AppConfig', () => {
       const routeConfig = router.config;
       expect(routeConfig).toBeDefined();
       expect(routeConfig.length).toBe(4);
-      
+
       // Verify specific routes
       const rootRoute = routeConfig.find(route => route.path === '');
       expect(rootRoute?.redirectTo).toBe('/cadastrar-pessoas');
-      
+
       const cadastrarRoute = routeConfig.find(route => route.path === 'cadastrar-pessoas');
       expect(cadastrarRoute?.loadComponent).toBeDefined();
-      
+
       const consultarRoute = routeConfig.find(route => route.path === 'consultar-dados');
       expect(consultarRoute?.loadComponent).toBeDefined();
-      
+
       const wildcardRoute = routeConfig.find(route => route.path === '**');
       expect(wildcardRoute?.loadComponent).toBeDefined();
     });
@@ -174,7 +174,7 @@ describe('AppConfig', () => {
   describe('HTTP Client Configuration', () => {
     it('should configure HttpClient and handle requests', async () => {
       httpClient.get('/test').subscribe();
-      
+
       const req = httpTestingController.expectOne('/test');
       expect(req.request.method).toBe('GET');
       req.flush({});
@@ -182,7 +182,7 @@ describe('AppConfig', () => {
 
     it('should apply interceptors to HTTP requests', () => {
       httpClient.get('/api/test').subscribe();
-      
+
       const req = httpTestingController.expectOne('/api/test');
       expect(req.request.method).toBe('GET');
       expect(req.request).toBeDefined();
@@ -204,9 +204,9 @@ describe('AppConfig', () => {
 
     it('should not have duplicate MessageService providers', () => {
       const providers = mockAppConfig.providers;
-      
-      const messageServiceProviders = providers.filter((provider: any) => 
-        provider === MessageService || 
+
+      const messageServiceProviders = providers.filter((provider: any) =>
+        provider === MessageService ||
         (typeof provider === 'object' && provider !== null && 'provide' in provider && provider.provide === MessageService)
       );
       expect(messageServiceProviders.length).toBe(1);
@@ -216,11 +216,11 @@ describe('AppConfig', () => {
   describe('Interceptor Order and Priority', () => {
     it('should register interceptors in correct order', () => {
       const interceptors = TestBed.inject(HTTP_INTERCEPTORS);
-      
+
       const tokenIndex = interceptors.findIndex(i => i instanceof TokenInterceptor);
       const errorIndex = interceptors.findIndex(i => i instanceof ErrorHandlingInterceptor);
       const loaderIndex = interceptors.findIndex(i => i instanceof LoaderInterceptor);
-      
+
       // All interceptors should be present
       expect(tokenIndex).toBeGreaterThanOrEqual(0);
       expect(errorIndex).toBeGreaterThanOrEqual(0);
@@ -237,22 +237,22 @@ describe('AppConfig', () => {
 
     it('should have proper provider types', () => {
       const providers = mockAppConfig.providers;
-      
+
       // Check that we have function providers (like provideRouter)
-      const hasProviderFunctions = providers.some((provider: any) => 
+      const hasProviderFunctions = providers.some((provider: any) =>
         typeof provider === 'object' && Array.isArray(provider)
       );
-      
+
       // Check that we have class providers (like MessageService)
-      const hasClassProviders = providers.some((provider: any) => 
+      const hasClassProviders = providers.some((provider: any) =>
         typeof provider === 'function'
       );
-      
+
       // Check that we have object providers (like HTTP_INTERCEPTORS)
-      const hasObjectProviders = providers.some((provider: any) => 
+      const hasObjectProviders = providers.some((provider: any) =>
         typeof provider === 'object' && provider !== null && !Array.isArray(provider)
       );
-      
+
       expect(hasClassProviders || hasObjectProviders).toBe(true);
     });
   });
