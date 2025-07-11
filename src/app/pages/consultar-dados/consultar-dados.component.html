@@ -13,11 +13,11 @@
       </header>
 
       <!-- Formulário de Busca -->
-      <section class="surface-card p-4 shadow-2 border-round mb-4"
+      <section data-testid="search-form" class="surface-card p-4 shadow-2 border-round mb-4"
                aria-labelledby="busca-heading"
                aria-describedby="busca-description">
 
-        <form novalidate aria-label="Formulário de busca de pessoa">
+        <form novalidate aria-label="Formulário de busca de pessoa" [formGroup]="searchForm">
 
           <!-- Campo CPF -->
           <div class="field">
@@ -33,16 +33,27 @@
                 id="cpf-busca"
                 type="text"
                 pInputText
+                formControlName="cpf"
                 class="flex-1"
                 placeholder="000.000.000-00"
                 maxlength="14"
                 autocomplete="off"
+                (input)="onCpfInput($event)"
                 aria-required="true"
                 aria-describedby="cpf-busca-help" />
             </div>
-            <small id="cpf-busca-help" class="block text-600 mt-1">
-              Digite o CPF da pessoa que deseja consultar
-            </small>
+            @if (!searchForm.get('cpf')?.invalid || !searchForm.get('cpf')?.touched) {
+              <small id="cpf-busca-help" class="block text-600 mt-1">
+                Digite o CPF da pessoa que deseja consultar
+              </small>
+            }
+
+            <!-- Mensagem de erro -->
+            @if (searchForm.get('cpf')?.invalid && searchForm.get('cpf')?.touched) {
+              <small id="cpf-error" class="block text-red-500 mt-1">
+                {{ getErrorMessage('cpf') }}
+              </small>
+            }
           </div>
 
           <!-- Ações de Busca -->
@@ -51,7 +62,9 @@
               type="button"
               pButton
               label="Limpar"
+              data-testid="btn-limpar"
               class="p-button-outlined p-button-secondary flex-1"
+              (click)="limparBusca()"
               aria-label="Limpar campo de busca">
               <i class="pi pi-refresh mr-2" aria-hidden="true"></i>
             </button>
@@ -61,7 +74,11 @@
               pButton
               label="Buscar"
               class="p-button-primary flex-1"
-              aria-label="Buscar pessoa pelo CPF informado">
+              data-testid="btn-buscar"
+              [disabled]="isLoading"
+              [loading]="isLoading"
+              aria-label="Buscar pessoa pelo CPF informado"
+              (click)="buscarPessoa()">
               <i class="pi pi-search mr-2" aria-hidden="true"></i>
             </button>
           </div>
@@ -70,178 +87,192 @@
       </section>
 
       <!-- Resultado da Busca -->
-      <section class="surface-card p-4 shadow-2 border-round"
-               aria-labelledby="resultado-heading">
+      @if (hasSearched && !errorMessage && pessoa) {
+        <section data-testid="pessoa-dados" class="surface-card p-4 shadow-2 border-round"
+                 aria-labelledby="resultado-heading">
 
-        <header class="mb-4">
-          <h2 class="text-xl font-medium text-900 mb-2" id="resultado-heading">
-            <i class="pi pi-user mr-2" aria-hidden="true"></i>
-            Dados da Pessoa
+          <header class="mb-4">
+            <h2 class="text-xl font-medium text-900 mb-2" id="resultado-heading">
+              <i class="pi pi-user mr-2" aria-hidden="true"></i>
+              Dados da Pessoa
+            </h2>
+          </header>
+
+          <!-- Card com dados da pessoa -->
+          <div class="p-3 surface-100 border-round">
+
+            <!-- Avatar e nome -->
+            <div class="flex align-items-center mb-4">
+              <div class="flex align-items-center justify-content-center bg-primary border-circle mr-3"
+                   style="width: 3rem; height: 3rem;"
+                   aria-hidden="true">
+                <i class="pi pi-user text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-900 m-0">{{ pessoa.nome }}</h3>
+                <p class="text-600 m-0 text-sm">CPF: {{ pessoa.cpf }}</p>
+              </div>
+            </div>
+
+            <!-- Grid de informações -->
+            <div class="grid gap-3">
+
+              <!-- Nome -->
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <label class="block text-600 font-medium mb-1">
+                    <i class="pi pi-user mr-1" aria-hidden="true"></i>
+                    Nome Completo
+                  </label>
+                  <p class="text-900 m-0">{{ pessoa.nome }}</p>
+                </div>
+              </div>
+
+              <!-- CPF -->
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <label class="block text-600 font-medium mb-1">
+                    <i class="pi pi-id-card mr-1" aria-hidden="true"></i>
+                    CPF
+                  </label>
+                  <p class="text-900 m-0">{{ pessoa.cpf }}</p>
+                </div>
+              </div>
+
+              <!-- Sexo -->
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <label class="block text-600 font-medium mb-1">
+                    <i class="pi pi-users mr-1" aria-hidden="true"></i>
+                    Sexo
+                  </label>
+                  <p class="text-900 m-0">{{ pessoa.sexo }}</p>
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="col-12 md:col-6">
+                <div class="field-group">
+                  <label class="block text-600 font-medium mb-1">
+                    <i class="pi pi-envelope mr-1" aria-hidden="true"></i>
+                    E-mail
+                  </label>
+                  <p class="text-900 m-0">{{ pessoa.email }}</p>
+                </div>
+              </div>
+
+              <!-- Telefone -->
+              <div class="col-12">
+                <div class="field-group">
+                  <label class="block text-600 font-medium mb-1">
+                    <i class="pi pi-phone mr-1" aria-hidden="true"></i>
+                    Telefone
+                  </label>
+                  <p class="text-900 m-0">{{ pessoa.telefone }}</p>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Ações sobre o resultado -->
+            <div class="flex flex-column md:flex-row gap-3 mt-4 pt-3 border-top-1 surface-border">
+
+              <button
+                type="button"
+                pButton
+                label="Nova Busca"
+                data-testid="btn-nova-busca"
+                class="p-button-outlined flex-1"
+                (click)="novaBusca()"
+                aria-label="Realizar uma nova busca">
+                <i class="pi pi-search mr-2" aria-hidden="true"></i>
+              </button>
+
+              <button
+                type="button"
+                pButton
+                label="Excluir"
+                data-testid="btn-excluir"
+                class="p-button-outlined p-button-danger flex-1"
+                aria-label="Excluir dados desta pessoa"
+                (click)="excluirDadosPessoa(pessoa.cpf)">
+                <i class="pi pi-trash mr-2" aria-hidden="true"></i>
+              </button>
+
+              <button
+                type="button"
+                pButton
+                label="Imprimir"
+                data-testid="btn-imprimir"
+                class="p-button-outlined p-button-secondary flex-1"
+                aria-label="Imprimir dados da pessoa"
+                (click)="imprimirTela()">
+                <i class="pi pi-print mr-2" aria-hidden="true"></i>
+              </button>
+
+            </div>
+          </div>
+
+        </section>
+      }
+
+      <!-- Estado de loading -->
+      @if (isLoading) {
+        <section data-testid="loading-section" class="surface-card p-6 shadow-2 border-round text-center"
+                 aria-labelledby="loading-heading">
+          <div class="mb-4">
+            <i class="pi pi-spin pi-spinner text-6xl text-primary" aria-hidden="true"></i>
+          </div>
+          <h2 class="text-xl font-medium text-600 mb-2" id="loading-heading">
+            Buscando pessoa...
           </h2>
-        </header>
+          <p class="text-600 line-height-3 m-0">
+            Por favor, aguarde enquanto consultamos os dados.
+          </p>
+        </section>
+      }
 
-        <!-- Card com dados da pessoa -->
-        <div class="p-3 surface-100 border-round">
-
-          <!-- Avatar e nome -->
-          <div class="flex align-items-center mb-4">
-            <div class="flex align-items-center justify-content-center bg-primary border-circle mr-3"
-                 style="width: 3rem; height: 3rem;"
-                 aria-hidden="true">
-              <i class="pi pi-user text-white text-xl"></i>
-            </div>
-            <div>
-              <h3 class="text-lg font-medium text-900 m-0">João Silva Santos</h3>
-              <p class="text-600 m-0 text-sm">CPF: 123.456.789-01</p>
-            </div>
+      <!-- Estado vazio -->
+      @if (!hasSearched && !isLoading) {
+        <section class="surface-card p-6 shadow-2 border-round text-center"
+                 aria-labelledby="empty-heading">
+          <div class="mb-4">
+            <i class="pi pi-search text-6xl text-400" aria-hidden="true"></i>
           </div>
+          <h2 class="text-xl font-medium text-600 mb-2" id="empty-heading">
+            Nenhuma busca realizada
+          </h2>
+          <p class="text-600 line-height-3 m-0">
+            Digite um CPF válido no campo acima para consultar os dados de uma pessoa
+          </p>
+        </section>
+      }
 
-          <!-- Grid de informações -->
-          <div class="grid gap-3">
-
-            <!-- Nome -->
-            <div class="col-12 md:col-6">
-              <div class="field-group">
-                <label class="block text-600 font-medium mb-1">
-                  <i class="pi pi-user mr-1" aria-hidden="true"></i>
-                  Nome Completo
-                </label>
-                <p class="text-900 m-0">João Silva Santos</p>
-              </div>
-            </div>
-
-            <!-- CPF -->
-            <div class="col-12 md:col-6">
-              <div class="field-group">
-                <label class="block text-600 font-medium mb-1">
-                  <i class="pi pi-id-card mr-1" aria-hidden="true"></i>
-                  CPF
-                </label>
-                <p class="text-900 m-0">123.456.789-01</p>
-              </div>
-            </div>
-
-            <!-- Sexo -->
-            <div class="col-12 md:col-6">
-              <div class="field-group">
-                <label class="block text-600 font-medium mb-1">
-                  <i class="pi pi-users mr-1" aria-hidden="true"></i>
-                  Sexo
-                </label>
-                <p class="text-900 m-0">Masculino</p>
-              </div>
-            </div>
-
-            <!-- Email -->
-            <div class="col-12 md:col-6">
-              <div class="field-group">
-                <label class="block text-600 font-medium mb-1">
-                  <i class="pi pi-envelope mr-1" aria-hidden="true"></i>
-                  E-mail
-                </label>
-                <p class="text-900 m-0">joao.silvaemail.com</p>
-              </div>
-            </div>
-
-            <!-- Telefone -->
-            <div class="col-12">
-              <div class="field-group">
-                <label class="block text-600 font-medium mb-1">
-                  <i class="pi pi-phone mr-1" aria-hidden="true"></i>
-                  Telefone
-                </label>
-                <p class="text-900 m-0">(11) 99999-9999</p>
-              </div>
-            </div>
-
+      <!-- Estado de erro -->
+      @if (hasSearched && errorMessage && !isLoading) {
+        <section data-testid="error-section" class="surface-card p-6 shadow-2 border-round text-center"
+                 aria-labelledby="error-heading">
+          <div class="mb-4">
+            <i class="pi pi-exclamation-triangle text-6xl text-orange-500" aria-hidden="true"></i>
           </div>
-
-          <!-- Ações sobre o resultado -->
-          <div class="flex flex-column md:flex-row gap-3 mt-4 pt-3 border-top-1 surface-border">
-
-            <button
-              type="button"
-              pButton
-              label="Nova Busca"
-              class="p-button-outlined flex-1"
-              aria-label="Realizar uma nova busca">
-              <i class="pi pi-search mr-2" aria-hidden="true"></i>
-            </button>
-
-            <button
-              type="button"
-              pButton
-              label="Editar"
-              class="p-button-outlined p-button-info flex-1"
-              aria-label="Editar dados desta pessoa">
-              <i class="pi pi-pencil mr-2" aria-hidden="true"></i>
-            </button>
-
-            <button
-              type="button"
-              pButton
-              label="Imprimir"
-              class="p-button-outlined p-button-secondary flex-1"
-              aria-label="Imprimir dados da pessoa">
-              <i class="pi pi-print mr-2" aria-hidden="true"></i>
-            </button>
-
-          </div>
-        </div>
-
-      </section>
-
-      <!-- Estado vazio (comentado para exemplo) -->
-      <!--
-      <section class="surface-card p-6 shadow-2 border-round text-center"
-               aria-labelledby="empty-heading">
-        <div class="mb-4">
-          <i class="pi pi-search text-6xl text-400" aria-hidden="true"></i>
-        </div>
-        <h2 class="text-xl font-medium text-600 mb-2" id="empty-heading">
-          Nenhuma busca realizada
-        </h2>
-        <p class="text-600 line-height-3 m-0">
-          Digite um CPF válido no campo acima para consultar os dados de uma pessoa
-        </p>
-      </section>
-      -->
-
-      <!-- Estado de erro (comentado para exemplo) -->
-      <!--
-      <section class="surface-card p-6 shadow-2 border-round text-center"
-               aria-labelledby="error-heading">
-        <div class="mb-4">
-          <i class="pi pi-exclamation-triangle text-6xl text-orange-500" aria-hidden="true"></i>
-        </div>
-        <h2 class="text-xl font-medium text-600 mb-2" id="error-heading">
-          Pessoa não encontrada
-        </h2>
-        <p class="text-600 line-height-3 mb-4">
-          Não foi possível encontrar uma pessoa com o CPF informado.
-          Verifique se o número está correto e tente novamente.
-        </p>
-        <button
-          type="button"
-          pButton
-          label="Tentar Novamente"
-          class="p-button-outlined"
-          aria-label="Tentar realizar a busca novamente">
-          <i class="pi pi-refresh mr-2" aria-hidden="true"></i>
-          Tentar Novamente
-        </button>
-      </section>
-      -->
+          <h2 class="text-xl font-medium text-600 mb-2" id="error-heading">
+            Pessoa não encontrada
+          </h2>
+          <p class="text-600 line-height-3 mb-4">
+            {{ errorMessage }}
+          </p>
+          <button
+            type="button"
+            pButton
+            label="Tentar Novamente"
+            class="p-button-outlined"
+            (click)="novaBusca()"
+            aria-label="Tentar realizar a busca novamente">
+            <i class="pi pi-refresh mr-2" aria-hidden="true"></i>
+          </button>
+        </section>
+      }
 
     </div>
   </div>
 </main>
-
-<!-- Toast para feedback do usuário -->
-<p-toast
-  position="top-right"
-  key="consulta"
-  [breakpoints]="{'920px': {width: '100%', right: '0', left: '0'}}"
-  aria-live="polite"
-  aria-label="Notificações do sistema">
-</p-toast>

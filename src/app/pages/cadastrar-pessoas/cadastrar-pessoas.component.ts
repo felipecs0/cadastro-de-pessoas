@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { PessoaDados } from '../../core/interfaces/pessoas.interface';
 import { FORM_FIELD_CONFIGS } from '../../core/constants/cadastro-pessoa-form.config';
 import { MaskUtils } from '../../core/utils/mask.utils';
-import { Toast } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { CommonModule } from '@angular/common';
 import { MessageService } from 'primeng/api';
@@ -24,7 +23,6 @@ import { MessageService } from 'primeng/api';
     ReactiveFormsModule,
     ButtonModule,
     SelectModule,
-    Toast,
     InputTextModule
   ],
   providers: [MessageService]
@@ -65,7 +63,7 @@ export class CadastrarPessoasComponent {
   public pessoaForm: FormGroup;
 
   constructor(
-    private readonly pessoaDados: PessoasService,
+    private readonly pessoasService: PessoasService,
     private readonly formBuilder: FormBuilder,
     private readonly router: Router,
     private readonly messageService: MessageService
@@ -73,135 +71,246 @@ export class CadastrarPessoasComponent {
     this.pessoaForm = this.formBuilder.group(this.CONTROLS);
   }
 
-  verDadosPessoa() {
-    if (this.pessoaForm.valid) {
-      const pessoaDados: PessoaDados = {
-        nome: this.CONTROLS.nome.value || '',
-        cpf: this.CONTROLS.cpf.value || '',
-        sexo: this.CONTROLS.sexo.value || '',
-        email: this.CONTROLS.email.value || '',
-        telefone: this.CONTROLS.telefone.value || ''
-      };
-
-      console.log('Dados da pessoa:', pessoaDados);
-
-      // Exibir mensagem de sucesso
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Sucesso',
-        detail: 'Pessoa cadastrada com sucesso!',
-        key: 'cadastro'
-      });
-
-      // Resetar formulário após sucesso
-      this.pessoaForm.reset();
-
-    } else {
-      console.log('Formulário inválido');
-      this.markFormGroupTouched();
-
-      // Exibir mensagem de erro
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'Por favor, corrija os erros no formulário',
-        key: 'cadastro'
-      });
+  cadastrarPessoa(): void {
+    if (!this.isFormValid()) {
+      this.handleInvalidForm();
+      return;
     }
+
+    const pessoaDados = this.buildPessoaDados();
+    this.submitPessoa(pessoaDados);
   }
 
-  private markFormGroupTouched() {
-    Object.keys(this.CONTROLS).forEach(key => {
-      const control = this.pessoaForm.get(key);
-      if (control) {
-        control.markAsTouched();
-      }
+  private isFormValid(): boolean {
+    return this.pessoaForm.valid;
+  }
+
+  private handleInvalidForm(): void {
+    this.markFormGroupTouched();
+    this.showErrorMessage('Por favor, corrija os erros no formulário');
+  }
+
+  private buildPessoaDados(): PessoaDados {
+    const formValue = this.pessoaForm.value;
+
+    return {
+      nome: formValue.nome || '',
+      cpf: formValue.cpf || '',
+      sexo: formValue.sexo || '',
+      email: formValue.email || '',
+      telefone: formValue.telefone || ''
+    };
+  }
+
+  private submitPessoa(pessoaDados: PessoaDados): void {
+    this.pessoasService.cadastrarNovaPessoa(pessoaDados).subscribe({
+      next: () => this.handleSubmitSuccess(),
+      error: (error) => this.handleSubmitError(error)
     });
   }
 
-  // Métodos para aplicar máscaras
-  onCpfInput(event: any): void {
-    MaskUtils.applyCPFMask(event);
+  private handleSubmitSuccess(): void {
+    this.showSuccessMessage('Pessoa cadastrada com sucesso!');
+    this.resetForm();
   }
 
-  onTelefoneInput(event: any): void {
-    MaskUtils.applyTelefoneMask(event);
+  private handleSubmitError(error: any): void {
+    console.error('Erro ao cadastrar pessoa:', error);
+    this.showErrorMessage('Erro ao cadastrar pessoa. Tente novamente.');
+  }
+
+  private resetForm(): void {
+    this.pessoaForm.reset();
+  }
+
+  private showSuccessMessage(detail: string): void {
+    this.showMessage('success', 'Sucesso', detail);
+  }
+
+  private showErrorMessage(detail: string): void {
+    this.showMessage('error', 'Erro', detail);
+  }
+
+  private showInfoMessage(detail: string): void {
+    this.showMessage('info', 'Informação', detail);
+  }
+
+  private showMessage(severity: 'success' | 'error' | 'info', summary: string, detail: string): void {
+    this.messageService.add({
+      severity,
+      summary,
+      detail,
+      key: 'cadastro'
+    });
+  }
+
+  private markFormGroupTouched(): void {
+    const controlNames = Object.keys(this.CONTROLS);
+    controlNames.forEach(controlName => {
+      this.markControlAsTouched(controlName);
+    });
+  }
+
+  private markControlAsTouched(controlName: string): void {
+    const control = this.pessoaForm.get(controlName);
+    if (control) {
+      control.markAsTouched();
+    }
+  }
+
+  // Métodos para aplicar máscaras
+  onCpfInput(event: Event): void {
+    this.applyMask(event, 'cpf');
+  }
+
+  onTelefoneInput(event: Event): void {
+    this.applyMask(event, 'telefone');
+  }
+
+  private applyMask(event: Event, maskType: 'cpf' | 'telefone'): void {
+    const maskHandlers = this.getMaskHandlers();
+    const handler = maskHandlers[maskType];
+
+    if (handler) {
+      handler(event);
+    }
+  }
+
+  private getMaskHandlers(): Record<string, (event: Event) => void> {
+    return {
+      cpf: MaskUtils.applyCPFMask,
+      telefone: MaskUtils.applyTelefoneMask
+    };
   }
 
   // Método para obter mensagens de erro específicas
   getErrorMessage(fieldName: string): string {
     const control = this.pessoaForm.get(fieldName);
-    if (control?.errors && control.touched) {
-      if (control.errors['required']) {
-        const fieldLabels: { [key: string]: string } = {
-          'nome': 'Nome',
-          'cpf': 'CPF',
-          'sexo': 'Sexo',
-          'email': 'E-mail',
-          'telefone': 'Telefone'
-        };
-        return `${fieldLabels[fieldName] || fieldName} é obrigatório`;
-      }
-      if (control.errors['pattern']) {
-        switch (fieldName) {
-          case 'cpf':
-            return 'CPF deve estar no formato 000.000.000-00';
-          case 'telefone':
-            return 'Telefone deve estar no formato (00) 00000-0000';
-          case 'email':
-            return 'Email deve ter um formato válido';
-          default:
-            return 'Formato inválido';
-        }
-      }
-      if (control.errors['cpfInvalid']) {
-        return 'CPF inválido';
-      }
-      if (control.errors['telefoneInvalid']) {
-        return 'Telefone deve ter 10 ou 11 dígitos';
-      }
-      if (control.errors['email']) {
-        return 'Email deve ter um formato válido';
-      }
-      if (control.errors['minlength']) {
-        return `Campo deve ter pelo menos ${control.errors['minlength'].requiredLength} caracteres`;
+
+    if (!this.hasControlErrors(control)) {
+      return '';
+    }
+
+    const errors = control!.errors!;
+    return this.getErrorMessageByType(errors, fieldName);
+  }
+
+  private hasControlErrors(control: any): boolean {
+    return control?.errors && control.touched;
+  }
+
+  private getErrorMessageByType(errors: any, fieldName: string): string {
+    const errorHandlers = this.getErrorHandlers();
+
+    for (const errorType of Object.keys(errors)) {
+      const handler = errorHandlers[errorType];
+      if (handler) {
+        return handler(errors[errorType], fieldName);
       }
     }
-    return '';
+
+    return 'Campo inválido';
+  }
+
+  private getErrorHandlers(): Record<string, (error: any, fieldName: string) => string> {
+    return {
+      required: (_, fieldName) => this.getRequiredErrorMessage(fieldName),
+      pattern: (_, fieldName) => this.getPatternErrorMessage(fieldName),
+      cpfInvalid: () => 'CPF inválido',
+      telefoneInvalid: () => 'Telefone deve ter 10 ou 11 dígitos',
+      email: () => 'Email deve ter um formato válido',
+      minlength: (error) => this.getMinLengthErrorMessage(error)
+    };
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldLabels = this.getFieldLabels();
+    const label = fieldLabels[fieldName] || this.capitalizeFirstLetter(fieldName);
+    return `${label} é obrigatório`;
+  }
+
+  private getPatternErrorMessage(fieldName: string): string {
+    const patternMessages = this.getPatternMessages();
+    return patternMessages[fieldName] || 'Formato inválido';
+  }
+
+  private getPatternMessages(): Record<string, string> {
+    return {
+      cpf: 'CPF deve estar no formato 000.000.000-00',
+      telefone: 'Telefone deve estar no formato (00) 00000-0000',
+      email: 'Email deve ter um formato válido'
+    };
+  }
+
+  private getMinLengthErrorMessage(minLengthError: any): string {
+    const requiredLength = minLengthError.requiredLength;
+    return `Campo deve ter pelo menos ${requiredLength} caracteres`;
+  }
+
+  private getFieldLabels(): Record<string, string> {
+    return {
+      nome: 'Nome',
+      cpf: 'CPF',
+      sexo: 'Sexo',
+      email: 'E-mail',
+      telefone: 'Telefone'
+    };
+  }
+
+  private capitalizeFirstLetter(text: string): string {
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   // Método para debug (remover em produção)
-  getFormErrors(): any {
-    const errors: any = {};
+  getFormErrors(): Record<string, any> {
+    const errors: Record<string, any> = {};
+
     Object.keys(this.CONTROLS).forEach(key => {
       const control = this.pessoaForm.get(key);
       if (control?.errors) {
         errors[key] = control.errors;
       }
     });
+
     return errors;
   }
 
   // Método para limpar formulário
   limparFormulario(): void {
-    this.pessoaForm.reset();
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Formulário limpo',
-      detail: 'Todos os campos foram resetados',
-      key: 'cadastro'
-    });
+    this.resetForm();
+    this.showInfoMessage('Todos os campos foram resetados');
   }
 
   // Método para cancelar e voltar
   cancelar(): void {
-    if (this.pessoaForm.dirty) {
-      // Implementar modal de confirmação se necessário
-      if (confirm('Tem certeza que deseja cancelar? Todos os dados serão perdidos.')) {
-        this.router.navigate(['/consultar-dados']);
-      }
+    if (this.hasUnsavedChanges()) {
+      this.confirmAndNavigate();
     } else {
-      this.router.navigate(['/consultar-dados']);
+      this.navigateToConsulta();
     }
+  }
+
+  private hasUnsavedChanges(): boolean {
+    return this.pessoaForm.dirty;
+  }
+
+  private confirmAndNavigate(): void {
+    const confirmationMessage = this.getUnsavedChangesMessage();
+
+    if (this.confirmNavigation(confirmationMessage)) {
+      this.navigateToConsulta();
+    }
+  }
+
+  private getUnsavedChangesMessage(): string {
+    return 'Tem certeza que deseja cancelar? Todos os dados serão perdidos.';
+  }
+
+  private confirmNavigation(message: string): boolean {
+    return confirm(message);
+  }
+
+  private navigateToConsulta(): void {
+    this.router.navigate(['/consultar-dados']);
   }
 }

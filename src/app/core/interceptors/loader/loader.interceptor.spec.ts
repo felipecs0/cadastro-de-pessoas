@@ -1,4 +1,4 @@
-import { createServiceFactory, SpectatorService } from '@ngneat/spectator';
+import { createServiceFactory, SpectatorService } from '@ngneat/spectator/jest';
 import { LoaderInterceptor } from './loader.interceptor';
 import { HttpErrorResponse, HttpHandler, HttpRequest } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
@@ -18,7 +18,7 @@ describe('LoaderInterceptor', () => {
     spectator = createService();
     interceptor = spectator.service;
     httpHandlerMock = {
-      handle: jasmine.createSpy('handle')
+      handle: jest.fn()
     } as unknown as HttpHandler;
   });
 
@@ -31,10 +31,10 @@ describe('LoaderInterceptor', () => {
   it('should hidden loader when intercepting request', fakeAsync(() => {
     const req = new HttpRequest('GET', '/test');
 
-    const showLoaderSpy = spyOn(interceptor, 'showLoader');
-    const hideLoaderSpy = spyOn(interceptor, 'hideLoader');
+    const showLoaderSpy = jest.spyOn(interceptor, 'showLoader');
+    const hideLoaderSpy = jest.spyOn(interceptor, 'hideLoader');
 
-    (httpHandlerMock.handle as jasmine.Spy).and.returnValue(of());
+    (httpHandlerMock.handle as jest.Mock).mockReturnValue(of());
     interceptor.intercept(req, httpHandlerMock).subscribe(() => {
       expect(showLoaderSpy).toHaveBeenCalled();
     });
@@ -45,7 +45,7 @@ describe('LoaderInterceptor', () => {
 
   it('should hide loader on error', (done) => {
     const req = new HttpRequest('GET', '/test');
-    const hideLoaderSpy = spyOn(interceptor, 'hideLoader');
+    const hideLoaderSpy = jest.spyOn(interceptor, 'hideLoader');
 
     const errorResponse = new HttpErrorResponse({
       status: 500,
@@ -53,7 +53,7 @@ describe('LoaderInterceptor', () => {
       error: 'Test error'
     });
 
-    (httpHandlerMock.handle as jasmine.Spy).and.returnValue(throwError(() => errorResponse));
+    (httpHandlerMock.handle as jest.Mock).mockReturnValue(throwError(() => errorResponse));
 
     interceptor.intercept(req, httpHandlerMock).subscribe({
       error: () => {
@@ -64,8 +64,8 @@ describe('LoaderInterceptor', () => {
   });
 
   it('should append loader to body when showing', fakeAsync(() => {
-    spyOn(document, 'getElementById').and.returnValue(null);
-    const appendChildSpy = spyOn(interceptor['renderer2'], 'appendChild');
+    jest.spyOn(document, 'getElementById').mockReturnValue(null);
+    const appendChildSpy = jest.spyOn(interceptor['renderer2'], 'appendChild');
 
     interceptor.showLoader();
     tick(100);
@@ -74,8 +74,8 @@ describe('LoaderInterceptor', () => {
   }));
 
   it('should remove loader from body when hiding', fakeAsync(() => {
-    const removeChildSpy = spyOn(interceptor['renderer2'], 'removeChild');
-    const domElementRemove = spyOn(interceptor.domElement as HTMLElement, "remove");
+    const removeChildSpy = jest.spyOn(interceptor['renderer2'], 'removeChild');
+    const domElementRemove = jest.spyOn(interceptor.domElement as HTMLElement, "remove");
 
     interceptor.hideLoader();
     tick(100);
@@ -86,10 +86,10 @@ describe('LoaderInterceptor', () => {
 
   it('should not show loader when same request is made multiple times', fakeAsync(() => {
     const req = new HttpRequest('GET', '/test');
-    const showLoaderSpy = spyOn(interceptor, 'showLoader');
+    const showLoaderSpy = jest.spyOn(interceptor, 'showLoader');
     const mockResponse = { type: 4, body: {} };
 
-    (httpHandlerMock.handle as jasmine.Spy).and.returnValue(of(mockResponse));
+    (httpHandlerMock.handle as jest.Mock).mockReturnValue(of(mockResponse));
 
     interceptor.intercept(req, httpHandlerMock).subscribe();
 
@@ -99,10 +99,10 @@ describe('LoaderInterceptor', () => {
 
   it('should filter out non-HttpResponse events', fakeAsync(() => {
     const req = new HttpRequest('GET', '/test');
-    const hideLoaderSpy = spyOn(interceptor, 'hideLoader');
+    const hideLoaderSpy = jest.spyOn(interceptor, 'hideLoader');
     const mockSentEvent = { type: 0 };
 
-    (httpHandlerMock.handle as jasmine.Spy).and.returnValue(of(mockSentEvent));
+    (httpHandlerMock.handle as jest.Mock).mockReturnValue(of(mockSentEvent));
 
     interceptor.intercept(req, httpHandlerMock).subscribe();
 

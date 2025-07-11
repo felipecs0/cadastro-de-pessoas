@@ -6,14 +6,14 @@ import { PessoaDados } from '../app/core/interfaces/pessoas.interface';
 const pessoasDatabase: PessoaDados[] = [
   {
     nome: 'João Silva Santos',
-    cpf: '123.456.789-01',
+    cpf: '123.456.789-09',
     sexo: 'masculino',
     email: 'joao.silva@email.com',
     telefone: '(11) 99999-8888'
   },
   {
     nome: 'Maria Oliveira Costa',
-    cpf: '987.654.321-09',
+    cpf: '607.590.260-09',
     sexo: 'feminino',
     email: 'maria.oliveira@email.com',
     telefone: '(11) 88888-7777'
@@ -27,7 +27,7 @@ const pessoasDatabase: PessoaDados[] = [
   },
   {
     nome: 'Ana Carolina Ferreira',
-    cpf: '321.654.987-21',
+    cpf: '987.654.321-00',
     sexo: 'feminino',
     email: 'ana.ferreira@email.com',
     telefone: '(11) 66666-5555'
@@ -87,7 +87,7 @@ export const handlers = [
     if (!cpfParam) {
       return HttpResponse.json(
         {
-          error: 'CPF é obrigatório',
+          title: 'CPF é obrigatório',
           message: 'Parâmetro CPF deve ser fornecido'
         },
         { status: 400 }
@@ -99,7 +99,7 @@ export const handlers = [
     if (!isValidCpf(cleanCpf)) {
       return HttpResponse.json(
         {
-          error: 'CPF inválido',
+          title: 'CPF inválido',
           message: 'O CPF fornecido não é válido'
         },
         { status: 400 }
@@ -114,7 +114,7 @@ export const handlers = [
     if (!pessoa) {
       return HttpResponse.json(
         {
-          error: 'Pessoa não encontrada',
+          title: 'Pessoa não encontrada',
           message: 'Nenhuma pessoa foi encontrada com o CPF fornecido'
         },
         { status: 404 }
@@ -138,7 +138,7 @@ export const handlers = [
       if (!novaPessoa.nome || !novaPessoa.cpf || !novaPessoa.sexo || !novaPessoa.email || !novaPessoa.telefone) {
         return HttpResponse.json(
           {
-            error: 'Dados incompletos',
+            title: 'Dados incompletos',
             message: 'Todos os campos são obrigatórios'
           },
           { status: 400 }
@@ -151,7 +151,7 @@ export const handlers = [
       if (!isValidCpf(cleanCpf)) {
         return HttpResponse.json(
           {
-            error: 'CPF inválido',
+            title: 'CPF inválido',
             message: 'O CPF fornecido não é válido'
           },
           { status: 400 }
@@ -193,7 +193,7 @@ export const handlers = [
       if (emailExists) {
         return HttpResponse.json(
           {
-            error: 'Email já cadastrado',
+            title: 'Email já cadastrado',
             message: 'Já existe uma pessoa cadastrada com este email'
           },
           { status: 409 }
@@ -225,7 +225,7 @@ export const handlers = [
     } catch (error) {
       return HttpResponse.json(
         {
-          error: 'Erro interno',
+          title: 'Erro interno',
           message: 'Erro ao processar requisição'
         },
         { status: 500 }
@@ -233,8 +233,8 @@ export const handlers = [
     }
   }),
 
-  // GET /pessoas/all - Listar todas as pessoas (endpoint adicional para debug)
-  http.get(`${environment.apiBaseUrl}/pessoas/all`, () => {
+  // GET /pessoas - Listar todas as pessoas
+  http.get(`${environment.apiBaseUrl}/pessoas`, () => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(HttpResponse.json({
@@ -257,7 +257,7 @@ export const handlers = [
     if (index === -1) {
       return HttpResponse.json(
         {
-          error: 'Pessoa não encontrada',
+          title: 'Pessoa não encontrada',
           message: 'Nenhuma pessoa foi encontrada com o CPF fornecido'
         },
         { status: 404 }
