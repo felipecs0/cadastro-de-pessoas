@@ -1,4 +1,5 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
+import { environment } from "@env/environment";
 import { Observable } from "rxjs";
 
 export class TokenInterceptor implements HttpInterceptor {
@@ -9,7 +10,7 @@ export class TokenInterceptor implements HttpInterceptor {
 
   setTokenQueryParams(request: HttpRequest<unknown>): HttpRequest<unknown> {
     return request.clone({
-      setParams: { token: '' }
+      setParams: { token: environment.tokenApi }
     });
   }
 }

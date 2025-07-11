@@ -1,24 +1,11 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, DestroyRef, inject } from '@angular/core';
-import { OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 
 // PrimeNG Components
-import { TabsModule } from 'primeng/tabs';
-import { CardModule } from 'primeng/card';
-import { Carousel } from 'primeng/carousel';
-import { Button, ButtonModule } from 'primeng/button';
-import { InputText, InputTextModule } from 'primeng/inputtext';
-import { FloatLabel } from 'primeng/floatlabel';
-import { Message } from 'primeng/message';
-import { ProgressSpinner } from 'primeng/progressspinner';
-import { Divider } from 'primeng/divider';
-import { Tag } from 'primeng/tag';
-import { Skeleton } from 'primeng/skeleton';
-import { Avatar } from 'primeng/avatar';
-import { Panel } from 'primeng/panel';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 
 import { PessoasService } from '@services/pessoas.service';
 import { PessoaDados } from '../../core/interfaces/pessoas.interface';
@@ -26,7 +13,7 @@ import { MaskUtils } from '../../core/utils/mask.utils';
 import { CustomValidators } from '../../core/validators/custom-validators';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { SelectModule } from 'primeng/select';
-import { Toast } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-consultar-dados',
@@ -34,11 +21,10 @@ import { Toast } from 'primeng/toast';
   styleUrls: ['./consultar-dados.component.scss'],
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-   imports     : [FormsModule, ButtonModule, AutoCompleteModule,SelectModule, Toast, ReactiveFormsModule, InputTextModule]
+  imports: [FormsModule, ButtonModule, AutoCompleteModule, SelectModule, ReactiveFormsModule, InputTextModule]
 })
-export class ConsultarDadosComponent implements OnInit {
+export class ConsultarDadosComponent {
   private destroyRef = inject(DestroyRef);
-  private identificadorPessoa = inject(ActivatedRoute).snapshot.params['id'];
 
   // Form para busca por CPF
   public searchForm: FormGroup;
@@ -54,22 +40,14 @@ export class ConsultarDadosComponent implements OnInit {
   public hasSearched = false;
   public pessoa: PessoaDados | null = null;
   public errorMessage: string = '';
-  public successMessage: string = '';
 
   constructor(
     private readonly pessoaService: PessoasService,
     private readonly router: Router,
-    private readonly formBuilder: FormBuilder
+    private readonly formBuilder: FormBuilder,
+    private readonly messageService: MessageService
   ) {
     this.searchForm = this.formBuilder.group(this.SEARCH_CONTROLS);
-  }
-
-  ngOnInit(): void {
-    // Se veio um ID da rota, buscar automaticamente
-    if (this.identificadorPessoa) {
-      this.SEARCH_CONTROLS.cpf.setValue(this.identificadorPessoa);
-      this.buscarPessoa();
-    }
   }
 
   // Aplicar máscara no CPF
@@ -83,46 +61,23 @@ export class ConsultarDadosComponent implements OnInit {
       this.isLoading = true;
       this.hasSearched = true;
       this.errorMessage = '';
-      this.successMessage = '';
       this.pessoa = null;
 
       const cpfLimpo = MaskUtils.removeMask(this.SEARCH_CONTROLS.cpf.value || '');
 
-      // Simular chamada API - substitua por chamada real
-      setTimeout(() => {
-        // Simular dados da pessoa (substitua por chamada real ao service)
-        if (cpfLimpo === '12345678901') {
-          this.pessoa = {
-            nome: 'João Silva Santos',
-            cpf: '123.456.789-01',
-            sexo: 'M',
-            email: 'joao.silva@email.com',
-            telefone: '(11) 99999-8888'
-          };
-          this.successMessage = 'Pessoa encontrada com sucesso!';
-        } else {
-          this.errorMessage = 'Pessoa não encontrada. Verifique o CPF digitado.';
-        }
-        this.isLoading = false;
-      }, 1500);
-
-      /*
       // Implementação real com service:
-      this.pessoaService.buscarPorCpf(cpfLimpo)
+      this.pessoaService.buscarPessoa(cpfLimpo)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (pessoa: PessoaDados) => {
             this.pessoa = pessoa;
-            this.successMessage = 'Pessoa encontrada com sucesso!';
             this.isLoading = false;
           },
-          error: (error) => {
+          error: () => {
             this.errorMessage = 'Pessoa não encontrada. Verifique o CPF digitado.';
             this.isLoading = false;
-            console.error('Erro ao buscar pessoa:', error);
           }
         });
-      */
     } else {
       this.markFormGroupTouched();
     }
@@ -133,9 +88,8 @@ export class ConsultarDadosComponent implements OnInit {
     this.searchForm.reset();
     this.pessoa = null;
     this.hasSearched = false;
-    this.errorMessage = '';
-    this.successMessage = '';
     this.isLoading = false;
+    this.errorMessage = '';
   }
 
   // Nova busca
@@ -170,6 +124,32 @@ export class ConsultarDadosComponent implements OnInit {
       }
     }
     return '';
+  }
+
+  imprimirTela(): void {
+    window.print()
+  }
+
+  excluirDadosPessoa(cpf: string): void {
+    if (this.pessoa) {
+      this.pessoaService.excluirPessoa(cpf)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.limparBusca();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Sucesso',
+              detail: 'Pessoa excluída com sucesso.',
+              key: 'cadastro'
+            });
+          },
+          error: (error) => {
+            this.errorMessage = 'Erro ao excluir pessoa.';
+            this.isLoading = false;
+          }
+        });
+    }
   }
 
   // Getter para facilitar acesso ao formulário válido

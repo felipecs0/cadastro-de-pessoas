@@ -1,4 +1,4 @@
-import { createServiceFactory, SpectatorService } from '@ngneat/spectator';
+import { createServiceFactory, SpectatorService } from '@ngneat/spectator/jest';
 import { TokenInterceptor } from './token.interceptor';
 import { HttpHandler, HttpRequest } from '@angular/common/http';
 import { of } from 'rxjs';
@@ -17,7 +17,7 @@ describe('TokenInterceptor', () => {
     spectator = createService();
     interceptor = spectator.service;
     httpHandlerMock = {
-      handle: jasmine.createSpy('handle')
+      handle: jest.fn()
     } as unknown as HttpHandler;
   });
 
@@ -30,8 +30,8 @@ describe('TokenInterceptor', () => {
     const modifiedRequest = new HttpRequest('GET', 'test-url')
     modifiedRequest.params.set('token', environment.tokenApi);
 
-    spyOn(interceptor, 'setTokenQueryParams').and.returnValue(modifiedRequest);
-    (httpHandlerMock.handle as jasmine.Spy).and.returnValue(of([]));
+    jest.spyOn(interceptor, 'setTokenQueryParams').mockReturnValue(modifiedRequest);
+    (httpHandlerMock.handle as jest.Mock).mockReturnValue(of([]));
 
     interceptor.intercept(request, httpHandlerMock);
 
@@ -43,7 +43,7 @@ describe('TokenInterceptor', () => {
     const request = new HttpRequest('GET', 'test-url');
     const result = interceptor.setTokenQueryParams(request);
 
-    expect(result.params.has('token')).toBeTrue();
+    expect(result.params.has('token')).toBe(true);
     expect(result.params.get('token')).toBe(environment.tokenApi);
   });
 });

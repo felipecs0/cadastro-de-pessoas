@@ -1,32 +1,34 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, DestroyRef, inject, Input } from '@angular/core';
-import { OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { SelectChangeEvent, SelectModule } from 'primeng/select';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, DestroyRef, inject } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { PessoasService } from '@services/pessoas.service';
-import { estadosDoBrasil } from 'src/app/core/constants/estados.constants';
-import { Estado } from '../../core/interfaces/estados.interface';
-import { Localidade } from '../../core/interfaces/localidade.interface';
 import { Router } from '@angular/router';
-import { FloatLabel } from "primeng/floatlabel"
 import { PessoaDados } from '../../core/interfaces/pessoas.interface';
-import { REGEX_PATTERNS, FORM_FIELD_CONFIGS } from '../../core/interfaces/form-validators.interface';
+import { FORM_FIELD_CONFIGS } from '../../core/constants/cadastro-pessoa-form.config';
 import { MaskUtils } from '../../core/utils/mask.utils';
-import { Toast } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
-import { AutoCompleteModule } from 'primeng/autocomplete';
+import { CommonModule } from '@angular/common';
+import { MessageService } from 'primeng/api';
 
 @Component({
-  selector    : 'app-cadastrar-pessoas',
-  templateUrl : './cadastrar-pessoas.component.html',
-  styleUrls   : ['./cadastrar-pessoas.component.scss'],
-  standalone  : true,
+  selector: 'app-cadastrar-pessoas',
+  templateUrl: './cadastrar-pessoas.component.html',
+  styleUrls: ['./cadastrar-pessoas.component.scss'],
+  standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports     : [FormsModule, ButtonModule, SelectModule, Toast, ReactiveFormsModule, InputTextModule]
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ButtonModule,
+    SelectModule,
+    InputTextModule
+  ]
 })
 export class CadastrarPessoasComponent {
   private destroyRef = inject(DestroyRef);
+
   public readonly sexoOptions = [
     { label: 'Masculino', value: 'masculino' },
     { label: 'Feminino', value: 'feminino' },
@@ -58,121 +60,250 @@ export class CadastrarPessoasComponent {
   };
 
   public pessoaForm: FormGroup;
-  public estadoSelecionado: Estado | null = null;
-  public cidadeSelecionada: Localidade | null = null;
-  public listaEstadosBrasil: Estado[] = estadosDoBrasil;
-  public listaCidades: Localidade[] | undefined;
 
   constructor(
-    private readonly pessoaDados: PessoasService,
+    private readonly pessoasService: PessoasService,
     private readonly formBuilder: FormBuilder,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly messageService: MessageService
   ) {
-    this.pessoaForm = this.formBuilder.group(this.CONTROLS)
+    this.pessoaForm = this.formBuilder.group(this.CONTROLS);
   }
 
-  buscarCidades(event: SelectChangeEvent) {
-    this.pessoaForm.get('cidade')?.enable();
-  }
-
-  verDadosPessoa() {
-    if (this.pessoaForm.valid) {
-      const pessoaDados: PessoaDados = {
-        nome: this.CONTROLS.nome.value || '',
-        cpf: this.CONTROLS.cpf.value || '',
-        sexo: this.CONTROLS.sexo.value || '',
-        email: this.CONTROLS.email.value || '',
-        telefone: this.CONTROLS.telefone.value || ''
-      };
-      console.log('Dados da pessoa:', pessoaDados);
-      // Aqui você pode fazer o que quiser com os dados (salvar, navegar, etc.)
-    } else {
-      console.log('Formulário inválido');
-      this.markFormGroupTouched();
+  cadastrarPessoa(): void {
+    if (!this.isFormValid()) {
+      this.handleInvalidForm();
+      return;
     }
+
+    const pessoaDados = this.buildPessoaDados();
+    this.submitPessoa(pessoaDados);
   }
 
-  private markFormGroupTouched() {
-    Object.keys(this.CONTROLS).forEach(key => {
-      const control = this.pessoaForm.get(key);
-      if (control) {
-        control.markAsTouched();
-      }
+  private isFormValid(): boolean {
+    return this.pessoaForm.valid;
+  }
+
+  private handleInvalidForm(): void {
+    this.markFormGroupTouched();
+    this.showErrorMessage('Por favor, corrija os erros no formulário');
+  }
+
+  private buildPessoaDados(): PessoaDados {
+    const formValue = this.pessoaForm.value;
+
+    return {
+      nome: formValue.nome || '',
+      cpf: formValue.cpf || '',
+      sexo: formValue.sexo || '',
+      email: formValue.email || '',
+      telefone: formValue.telefone || ''
+    };
+  }
+
+  private submitPessoa(pessoaDados: PessoaDados): void {
+    this.pessoasService.cadastrarNovaPessoa(pessoaDados).subscribe({
+      next: () => this.handleSubmitSuccess(),
     });
   }
 
+  private handleSubmitSuccess(): void {
+    this.showSuccessMessage('Pessoa cadastrada com sucesso!');
+    this.resetForm();
+  }
+
+  private resetForm(): void {
+    this.pessoaForm.reset();
+  }
+
+  private showSuccessMessage(detail: string): void {
+    this.showMessage('success', 'Sucesso', detail);
+  }
+
+  private showErrorMessage(detail: string): void {
+    this.showMessage('error', 'Erro', detail);
+  }
+
+  private showInfoMessage(detail: string): void {
+    this.showMessage('info', 'Informação', detail);
+  }
+
+  private showMessage(severity: 'success' | 'error' | 'info', summary: string, detail: string): void {
+    this.messageService.add({
+      severity,
+      summary,
+      detail,
+      key: 'cadastro'
+    });
+  }
+
+  private markFormGroupTouched(): void {
+    const controlNames = Object.keys(this.CONTROLS);
+    controlNames.forEach(controlName => {
+      this.markControlAsTouched(controlName);
+    });
+  }
+
+  private markControlAsTouched(controlName: string): void {
+    const control = this.pessoaForm.get(controlName);
+    if (control) {
+      control.markAsTouched();
+    }
+  }
+
   // Métodos para aplicar máscaras
-  onCpfInput(event: any): void {
-    MaskUtils.applyCPFMask(event);
+  onCpfInput(event: Event): void {
+    this.applyMask(event, 'cpf');
   }
 
-  onTelefoneInput(event: any): void {
-    MaskUtils.applyTelefoneMask(event);
+  onTelefoneInput(event: Event): void {
+    this.applyMask(event, 'telefone');
   }
 
-  // Método para validar CPF
-  isValidCPF(cpf: string): boolean {
-    const cleanCpf = MaskUtils.removeMask(cpf);
+  private applyMask(event: Event, maskType: 'cpf' | 'telefone'): void {
+    const maskHandlers = this.getMaskHandlers();
+    const handler = maskHandlers[maskType];
 
-    if (cleanCpf.length !== 11) return false;
-
-    // Verifica se todos os dígitos são iguais
-    if (/^(\d)\1+$/.test(cleanCpf)) return false;
-
-    // Validação do primeiro dígito verificador
-    let sum = 0;
-    for (let i = 0; i < 9; i++) {
-      sum += parseInt(cleanCpf.charAt(i)) * (10 - i);
+    if (handler) {
+      handler(event);
     }
-    let firstDigit = 11 - (sum % 11);
-    if (firstDigit >= 10) firstDigit = 0;
+  }
 
-    if (parseInt(cleanCpf.charAt(9)) !== firstDigit) return false;
-
-    // Validação do segundo dígito verificador
-    sum = 0;
-    for (let i = 0; i < 10; i++) {
-      sum += parseInt(cleanCpf.charAt(i)) * (11 - i);
-    }
-    let secondDigit = 11 - (sum % 11);
-    if (secondDigit >= 10) secondDigit = 0;
-
-    return parseInt(cleanCpf.charAt(10)) === secondDigit;
+  private getMaskHandlers(): Record<string, (event: Event) => void> {
+    return {
+      cpf: MaskUtils.applyCPFMask,
+      telefone: MaskUtils.applyTelefoneMask
+    };
   }
 
   // Método para obter mensagens de erro específicas
   getErrorMessage(fieldName: string): string {
     const control = this.pessoaForm.get(fieldName);
-    if (control?.errors && control.touched) {
-      if (control.errors['required']) {
-        return `${fieldName} é obrigatório`;
-      }
-      if (control.errors['pattern']) {
-        switch (fieldName) {
-          case 'cpf':
-            return 'CPF deve estar no formato 000.000.000-00';
-          case 'telefone':
-            return 'Telefone deve estar no formato (00) 00000-0000';
-          case 'email':
-            return 'Email deve ter um formato válido';
-          default:
-            return 'Formato inválido';
-        }
-      }
-      if (control.errors['cpfInvalid']) {
-        return 'CPF inválido';
-      }
-      if (control.errors['telefoneInvalid']) {
-        return 'Telefone deve ter 10 ou 11 dígitos';
-      }
-      if (control.errors['email']) {
-        return 'Email deve ter um formato válido';
-      }
-      if (control.errors['minlength']) {
-        return `${fieldName} deve ter pelo menos ${control.errors['minlength'].requiredLength} caracteres`;
-      }
+
+    if (!this.hasControlErrors(control)) {
+      return '';
     }
-    return '';
+
+    const errors = control!.errors!;
+    return this.getErrorMessageByType(errors, fieldName);
   }
 
+  private hasControlErrors(control: any): boolean {
+    return control?.errors && control.touched;
+  }
+
+  private getErrorMessageByType(errors: any, fieldName: string): string {
+    const errorHandlers = this.getErrorHandlers();
+
+    for (const errorType of Object.keys(errors)) {
+      const handler = errorHandlers[errorType];
+      if (handler) {
+        return handler(errors[errorType], fieldName);
+      }
+    }
+
+    return 'Campo inválido';
+  }
+
+  private getErrorHandlers(): Record<string, (error: any, fieldName: string) => string> {
+    return {
+      required: (_, fieldName) => this.getRequiredErrorMessage(fieldName),
+      pattern: (_, fieldName) => this.getPatternErrorMessage(fieldName),
+      cpfInvalid: () => 'CPF inválido',
+      telefoneInvalid: () => 'Telefone deve ter 10 ou 11 dígitos',
+      email: () => 'Email deve ter um formato válido',
+      minlength: (error) => this.getMinLengthErrorMessage(error)
+    };
+  }
+
+  private getRequiredErrorMessage(fieldName: string): string {
+    const fieldLabels = this.getFieldLabels();
+    const label = fieldLabels[fieldName] || this.capitalizeFirstLetter(fieldName);
+    return `${label} é obrigatório`;
+  }
+
+  private getPatternErrorMessage(fieldName: string): string {
+    const patternMessages = this.getPatternMessages();
+    return patternMessages[fieldName] || 'Formato inválido';
+  }
+
+  private getPatternMessages(): Record<string, string> {
+    return {
+      cpf: 'CPF deve estar no formato 000.000.000-00',
+      telefone: 'Telefone deve estar no formato (00) 00000-0000',
+      email: 'Email deve ter um formato válido'
+    };
+  }
+
+  private getMinLengthErrorMessage(minLengthError: any): string {
+    const requiredLength = minLengthError.requiredLength;
+    return `Campo deve ter pelo menos ${requiredLength} caracteres`;
+  }
+
+  private getFieldLabels(): Record<string, string> {
+    return {
+      nome: 'Nome',
+      cpf: 'CPF',
+      sexo: 'Sexo',
+      email: 'E-mail',
+      telefone: 'Telefone'
+    };
+  }
+
+  private capitalizeFirstLetter(text: string): string {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  // Método para debug (remover em produção)
+  getFormErrors(): Record<string, any> {
+    const errors: Record<string, any> = {};
+
+    Object.keys(this.CONTROLS).forEach(key => {
+      const control = this.pessoaForm.get(key);
+      if (control?.errors) {
+        errors[key] = control.errors;
+      }
+    });
+
+    return errors;
+  }
+
+  // Método para limpar formulário
+  limparFormulario(): void {
+    this.resetForm();
+    this.showInfoMessage('Todos os campos foram resetados');
+  }
+
+  // Método para cancelar e voltar
+  cancelar(): void {
+    if (this.hasUnsavedChanges()) {
+      this.confirmAndNavigate();
+    } else {
+      this.navigateToConsulta();
+    }
+  }
+
+  private hasUnsavedChanges(): boolean {
+    return this.pessoaForm.dirty;
+  }
+
+  private confirmAndNavigate(): void {
+    const confirmationMessage = this.getUnsavedChangesMessage();
+
+    if (this.confirmNavigation(confirmationMessage)) {
+      this.navigateToConsulta();
+    }
+  }
+
+  private getUnsavedChangesMessage(): string {
+    return 'Tem certeza que deseja cancelar? Todos os dados serão perdidos.';
+  }
+
+  private confirmNavigation(message: string): boolean {
+    return confirm(message);
+  }
+
+  private navigateToConsulta(): void {
+    this.router.navigate(['/consultar-dados']);
+  }
 }

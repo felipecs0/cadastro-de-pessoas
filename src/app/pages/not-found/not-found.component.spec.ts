@@ -1,14 +1,16 @@
 import { NotFoundComponent } from './not-found.component';
 import { ButtonModule } from 'primeng/button';
-import { Spectator, createComponentFactory } from '@ngneat/spectator';
+import { Spectator, createComponentFactory } from '@ngneat/spectator/jest';
 import { Router } from '@angular/router';
 
 describe('NotFoundComponent', () => {
   let spectator: Spectator<NotFoundComponent>;
   let component: NotFoundComponent;
-  let router: jasmine.SpyObj<Router>;
+  let router: jest.Mocked<Router>;
 
-  const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+  const routerSpy = {
+    navigate: jest.fn()
+  };
 
   const createComponent = createComponentFactory({
     component: NotFoundComponent,
@@ -21,7 +23,7 @@ describe('NotFoundComponent', () => {
   beforeEach(() => {
     spectator = createComponent();
     component = spectator.component;
-    router = spectator.inject(Router) as jasmine.SpyObj<Router>;
+    router = spectator.inject(Router) as jest.Mocked<Router>;
   });
 
   it('should create', () => {
@@ -30,7 +32,7 @@ describe('NotFoundComponent', () => {
 
   it('should have a button with label "Voltar para Home"', () => {
     const button = spectator.query('#voltar');
-    expect(button).toHaveText('Voltar para Home');
+    expect(button).toHaveText('Voltar ao início');
   });
 
   it('should navigate to home on button click', () => {

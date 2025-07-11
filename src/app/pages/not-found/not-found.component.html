@@ -1,10 +1,31 @@
-<section class="max-h-screen max-w-screen translate-y-100">
-  <div class="flex justify-content-center align-content-center flex-wrap">
-    <i class="pi pi-exclamation-triangle text-7xl text-red-600 mr-3"></i>
-    <div class="text-left">
-      <h1 class="mb-2 text-3xl">Página Não Encontrada</h1>
-      <p class="mb-4">A página que você está procurando não existe.</p>
+<main class="not-found-container">
+  <div class="not-found-content">
+    <div class="error-code">
+      404
+    </div>
+
+    <div class="error-content">
+      <h1 class="error-title">
+        Página não encontrada
+      </h1>
+
+      <p class="error-description">
+        A página que você está procurando não existe ou foi movida para outro local.
+      </p>
+
+      <div class="error-actions">
+        <p-button
+          id="voltar"
+          label="Voltar ao início"
+          icon="pi pi-home"
+          severity="secondary"
+          size="large"
+          [text]="false"
+          [outlined]="true"
+          (onClick)="voltarHome()"
+          class="home-button"
+        />
+      </div>
     </div>
   </div>
-  <p-button id="voltar" label="Voltar para Home" fluid size="large" (onClick)="voltarHome()" />
-</section>
+</main>
