@@ -24,8 +24,7 @@ import { MessageService } from 'primeng/api';
     ButtonModule,
     SelectModule,
     InputTextModule
-  ],
-  providers: [MessageService]
+  ]
 })
 export class CadastrarPessoasComponent {
   private destroyRef = inject(DestroyRef);
@@ -105,18 +104,12 @@ export class CadastrarPessoasComponent {
   private submitPessoa(pessoaDados: PessoaDados): void {
     this.pessoasService.cadastrarNovaPessoa(pessoaDados).subscribe({
       next: () => this.handleSubmitSuccess(),
-      error: (error) => this.handleSubmitError(error)
     });
   }
 
   private handleSubmitSuccess(): void {
     this.showSuccessMessage('Pessoa cadastrada com sucesso!');
     this.resetForm();
-  }
-
-  private handleSubmitError(error: any): void {
-    console.error('Erro ao cadastrar pessoa:', error);
-    this.showErrorMessage('Erro ao cadastrar pessoa. Tente novamente.');
   }
 
   private resetForm(): void {

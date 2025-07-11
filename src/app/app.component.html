@@ -1,49 +1,90 @@
 <div class="scrollable-container">
   <div class="layout w-full p-4">
     <header class="surface-card shadow-1 border-round mb-4 mt-4" role="banner">
-        <div class="flex justify-content-between align-items-center p-4">
+      <div class="flex justify-content-between align-items-center p-4">
 
-          <!-- Logo/Título -->
-          <div class="flex align-items-center">
-            <i class="pi pi-users text-primary text-2xl mr-3" aria-hidden="true"></i>
-            <h1 class="text-xl font-medium text-900 m-0">
-              Cadastro de Pessoas
-            </h1>
-          </div>
-
-          <!-- Menu de Navegação -->
-          <nav aria-label="Menu principal">
-            <div class="flex gap-2">
-
-              <a
-                routerLink="/cadastrar-pessoas"
-                routerLinkActive="p-button-primary"
-                class="p-button p-button-outlined p-button-sm"
-                pButton
-                label="Cadastrar"
-                aria-label="Ir para página de cadastro de pessoas">
-                <i class="pi pi-plus mr-2" aria-hidden="true"></i>
-                Cadastrar
-              </a>
-
-              <a
-                routerLink="/consultar-dados"
-                routerLinkActive="p-button-primary"
-                class="p-button p-button-outlined p-button-sm"
-                pButton
-                label="Consultar"
-                aria-label="Ir para página de consulta de pessoas">
-                <i class="pi pi-search mr-2" aria-hidden="true"></i>
-                Consultar
-              </a>
-
-            </div>
-          </nav>
-
+        <!-- Logo/Título -->
+        <div class="flex align-items-center">
+          <i class="pi pi-users text-primary text-2xl mr-3" aria-hidden="true"></i>
+          <h1 class="text-xl font-medium text-900 m-0 header-title">
+            Cadastro de Pessoas
+          </h1>
         </div>
-      </header>
+
+        <!-- Menu de Navegação Desktop -->
+        <nav aria-label="Menu principal" class="desktop-menu">
+          <div class="flex gap-2">
+            <a
+              routerLink="/cadastrar-pessoas"
+              routerLinkActive="p-button-primary"
+              class="p-button p-button-outlined p-button-sm"
+              pButton
+              label="Cadastrar"
+              aria-label="Ir para página de cadastro de pessoas">
+              <i class="pi pi-plus mr-2" aria-hidden="true"></i>
+            </a>
+
+            <a
+              routerLink="/consultar-dados"
+              routerLinkActive="p-button-primary"
+              class="p-button p-button-outlined p-button-sm"
+              pButton
+              label="Consultar"
+              aria-label="Ir para página de consulta de pessoas">
+              <i class="pi pi-search mr-2" aria-hidden="true"></i>
+            </a>
+          </div>
+        </nav>
+
+        <!-- Botão Menu Mobile -->
+        <button
+          class="mobile-menu-button p-button p-button-text p-button-sm"
+          (click)="toggleMobileMenu()"
+          [attr.aria-expanded]="mobileMenuOpen"
+          aria-label="Abrir menu de navegação"
+          aria-controls="mobile-menu">
+          <i class="pi pi-bars text-xl" aria-hidden="true"></i>
+        </button>
+
+      </div>
+
+      <!-- Menu Mobile -->
+      <div
+        id="mobile-menu"
+        class="mobile-menu"
+        [class.mobile-menu-open]="mobileMenuOpen"
+        [attr.aria-hidden]="!mobileMenuOpen">
+        <nav aria-label="Menu principal mobile" class="mobile-menu-nav">
+          <div class="flex flex-column gap-2 p-4">
+            <a
+              routerLink="/cadastrar-pessoas"
+              routerLinkActive="p-button-primary"
+              class="p-button p-button-outlined p-button-sm w-full"
+              pButton
+              label="Cadastrar"
+              aria-label="Ir para página de cadastro de pessoas"
+              (click)="closeMobileMenu()">
+              <i class="pi pi-plus mr-2" aria-hidden="true"></i>
+            </a>
+
+            <a
+              routerLink="/consultar-dados"
+              routerLinkActive="p-button-primary"
+              class="p-button p-button-outlined p-button-sm w-full"
+              pButton
+              label="Consultar"
+              aria-label="Ir para página de consulta de pessoas"
+              (click)="closeMobileMenu()">
+              <i class="pi pi-search mr-2" aria-hidden="true"></i>
+            </a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Toast para mensagens globais -->
     <p-toast position="top-right" key="tl" />
+    <p-toast position="top-right" key="cadastro" />
     <router-outlet></router-outlet>
   </div>
 </div>
-

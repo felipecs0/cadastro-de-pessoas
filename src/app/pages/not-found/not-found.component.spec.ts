@@ -32,7 +32,7 @@ describe('NotFoundComponent', () => {
 
   it('should have a button with label "Voltar para Home"', () => {
     const button = spectator.query('#voltar');
-    expect(button).toHaveText('Voltar para Home');
+    expect(button).toHaveText('Voltar ao início');
   });
 
   it('should navigate to home on button click', () => {

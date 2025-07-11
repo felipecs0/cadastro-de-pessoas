@@ -12,33 +12,12 @@ const pessoasDatabase: PessoaDados[] = [
     telefone: '(11) 99999-8888'
   },
   {
-    nome: 'Maria Oliveira Costa',
-    cpf: '607.590.260-09',
-    sexo: 'feminino',
-    email: 'maria.oliveira@email.com',
-    telefone: '(11) 88888-7777'
-  },
-  {
-    nome: 'Pedro Santos Lima',
-    cpf: '456.789.123-45',
-    sexo: 'masculino',
-    email: 'pedro.lima@email.com',
-    telefone: '(11) 77777-6666'
-  },
-  {
     nome: 'Ana Carolina Ferreira',
     cpf: '987.654.321-00',
     sexo: 'feminino',
     email: 'ana.ferreira@email.com',
     telefone: '(11) 66666-5555'
   },
-  {
-    nome: 'Carlos Eduardo Silva',
-    cpf: '789.123.456-78',
-    sexo: 'masculino',
-    email: 'carlos.eduardo@email.com',
-    telefone: '(11) 55555-4444'
-  }
 ];
 
 // Função para remover máscara do CPF

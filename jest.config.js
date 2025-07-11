@@ -27,6 +27,7 @@ module.exports = {
   ],
   collectCoverageFrom: [
     'projects/**/*.ts',
+    'src/app/**/*.ts',
     '!projects/**/__test__/**',
     '!projects/**/cypress/**',
     '!projects/**/bootstrap.ts',
