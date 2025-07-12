@@ -42,17 +42,15 @@
               aria-describedby="nome-help nome-error" />
 
             <!-- Mensagem de erro -->
-            <small *ngIf="pessoaForm.get('nome')?.invalid && pessoaForm.get('nome')?.touched"
-                   id="nome-error"
-                   class="block text-red-500 mt-1">
-              {{ getErrorMessage('nome') }}
-            </small>
-
-            <small *ngIf="!pessoaForm.get('nome')?.invalid || !pessoaForm.get('nome')?.touched"
-                   id="nome-help"
-                   class="block text-600 mt-1">
-              Informe o nome completo da pessoa
-            </small>
+            @if (pessoaForm.get('nome')?.invalid && pessoaForm.get('nome')?.touched) {
+              <small id="nome-error" class="block text-red-500 mt-1">
+                {{ getErrorMessage('nome') }}
+              </small>
+            } @else {
+              <small id="nome-help" class="block text-600 mt-1">
+                Informe o nome completo da pessoa
+              </small>
+            }
           </div>
 
           <!-- Campo CPF -->
@@ -77,17 +75,15 @@
               aria-describedby="cpf-help cpf-error" />
 
             <!-- Mensagem de erro -->
-            <small *ngIf="pessoaForm.get('cpf')?.invalid && pessoaForm.get('cpf')?.touched"
-                   id="cpf-error"
-                   class="block text-red-500 mt-1">
-              {{ getErrorMessage('cpf') }}
-            </small>
-
-            <small *ngIf="!pessoaForm.get('cpf')?.invalid || !pessoaForm.get('cpf')?.touched"
-                   id="cpf-help"
-                   class="block text-600 mt-1">
-              Digite apenas números, a formatação será aplicada automaticamente
-            </small>
+            @if (pessoaForm.get('cpf')?.invalid && pessoaForm.get('cpf')?.touched) {
+              <small id="cpf-error" class="block text-red-500 mt-1">
+                {{ getErrorMessage('cpf') }}
+              </small>
+            } @else {
+              <small id="cpf-help" class="block text-600 mt-1">
+                Digite apenas números, a formatação será aplicada automaticamente
+              </small>
+            }
           </div>
 
           <!-- Campo Sexo -->
@@ -111,17 +107,15 @@
             </p-select>
 
             <!-- Mensagem de erro -->
-            <small *ngIf="pessoaForm.get('sexo')?.invalid && pessoaForm.get('sexo')?.touched"
-                   id="sexo-error"
-                   class="block text-red-500 mt-1">
-              {{ getErrorMessage('sexo') }}
-            </small>
-
-            <small *ngIf="!pessoaForm.get('sexo')?.invalid || !pessoaForm.get('sexo')?.touched"
-                   id="sexo-help"
-                   class="block text-600 mt-1">
-              Selecione uma das opções disponíveis
-            </small>
+            @if (pessoaForm.get('sexo')?.invalid && pessoaForm.get('sexo')?.touched) {
+              <small id="sexo-error" class="block text-red-500 mt-1">
+                {{ getErrorMessage('sexo') }}
+              </small>
+            } @else {
+              <small id="sexo-help" class="block text-600 mt-1">
+                Selecione uma das opções disponíveis
+              </small>
+            }
           </div>
 
           <!-- Campo Email -->
@@ -144,17 +138,15 @@
               aria-describedby="email-help email-error" />
 
             <!-- Mensagem de erro -->
-            <small *ngIf="pessoaForm.get('email')?.invalid && pessoaForm.get('email')?.touched"
-                   id="email-error"
-                   class="block text-red-500 mt-1">
-              {{ getErrorMessage('email') }}
-            </small>
-
-            <small *ngIf="!pessoaForm.get('email')?.invalid || !pessoaForm.get('email')?.touched"
-                   id="email-help"
-                   class="block text-600 mt-1">
-              Informe um endereço de e-mail válido
-            </small>
+            @if (pessoaForm.get('email')?.invalid && pessoaForm.get('email')?.touched) {
+              <small id="email-error" class="block text-red-500 mt-1">
+                {{ getErrorMessage('email') }}
+              </small>
+            } @else {
+              <small id="email-help" class="block text-600 mt-1">
+                Informe um endereço de e-mail válido
+              </small>
+            }
           </div>
 
           <!-- Campo Telefone -->
@@ -177,17 +169,15 @@
               aria-describedby="telefone-help telefone-error" />
 
             <!-- Mensagem de erro -->
-            <small *ngIf="pessoaForm.get('telefone')?.invalid && pessoaForm.get('telefone')?.touched"
-                   id="telefone-error"
-                   class="block text-red-500 mt-1">
-              {{ getErrorMessage('telefone') }}
-            </small>
-
-            <small *ngIf="!pessoaForm.get('telefone')?.invalid || !pessoaForm.get('telefone')?.touched"
-                   id="telefone-help"
-                   class="block text-600 mt-1">
-              Telefone com DDD (opcional)
-            </small>
+            @if (pessoaForm.get('telefone')?.invalid && pessoaForm.get('telefone')?.touched) {
+              <small id="telefone-error" class="block text-red-500 mt-1">
+                {{ getErrorMessage('telefone') }}
+              </small>
+            } @else {
+              <small id="telefone-help" class="block text-600 mt-1">
+                Telefone com DDD (opcional)
+              </small>
+            }
           </div>
 
         </div>
@@ -222,15 +212,17 @@
         </div>
 
         <!-- Debug do formulário (remover em produção) -->
-        <div class="mt-4 p-3 surface-200 border-round" *ngIf="false">
-          <h4>Debug do Formulário:</h4>
-          <p><strong>Status:</strong> {{ pessoaForm.status }}</p>
-          <p><strong>Válido:</strong> {{ pessoaForm.valid }}</p>
-          <p><strong>Valores:</strong></p>
-          <pre>{{ pessoaForm.value | json }}</pre>
-          <p><strong>Erros:</strong></p>
-          <pre>{{ getFormErrors() | json }}</pre>
-        </div>
+        @if (false) {
+          <div class="mt-4 p-3 surface-200 border-round">
+            <h4>Debug do Formulário:</h4>
+            <p><strong>Status:</strong> {{ pessoaForm.status }}</p>
+            <p><strong>Válido:</strong> {{ pessoaForm.valid }}</p>
+            <p><strong>Valores:</strong></p>
+            <pre>{{ pessoaForm.value | json }}</pre>
+            <p><strong>Erros:</strong></p>
+            <pre>{{ getFormErrors() | json }}</pre>
+          </div>
+        }
 
       </form>
 

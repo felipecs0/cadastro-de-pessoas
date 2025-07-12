@@ -10,6 +10,7 @@ import { MaskUtils } from '../../core/utils/mask.utils';
 import { InputTextModule } from 'primeng/inputtext';
 import { CommonModule } from '@angular/common';
 import { MessageService } from 'primeng/api';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-cadastrar-pessoas',
@@ -102,7 +103,9 @@ export class CadastrarPessoasComponent {
   }
 
   private submitPessoa(pessoaDados: PessoaDados): void {
-    this.pessoasService.cadastrarNovaPessoa(pessoaDados).subscribe({
+    this.pessoasService.cadastrarNovaPessoa(pessoaDados)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: () => this.handleSubmitSuccess(),
     });
   }
